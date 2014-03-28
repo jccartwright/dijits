@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=7,IE=9">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>Simple Map Test</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/tundra/tundra.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/esri/css/esri.css">
+    <style>
+        html, body, #map {
+            height:100%;
+            width:100%;
+            margin:0;
+            padding:0;
+        }
+    </style>
+    <script>
+        var dojoConfig = {
+            parseOnLoad: false,
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+            {
+                name: "app",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+            }],
+
+            //app-specific config values
+            app: {
+                loglevel: 2
+            }
+        };
+    </script>
+
+    <script src="http://js.arcgis.com/3.7/"></script>
+
+    <script>
+        require(
+        [
+            "ngdc/Logger", "ngdc/MapConfig", "app/SimpleAppLayerCollection",
+            "dojo/_base/config", "dojo/io-query", "dojo/_base/lang", "dojo/ready", "dojo/domReady!"
+        ],
+        function(Logger, MapConfig, AppLayerCollection, config, ioQuery, lang, ready) {
+            ready(function() {
+
+                var queryParams = ioQuery.queryToObject(location.search.substring(1));
+                lang.mixin(config.app, queryParams);
+
+                //put the logger into global so all modules have access
+                window.logger = new Logger(config.app.loglevel);
+
+                var mapConfig = new MapConfig("map", {
+                    center:[-102,40],
+                    zoom: 5,
+                    logo: false,
+                    overview: true
+                }, new AppLayerCollection());
+            });
+        }
+        );
+    </script>
+</head>
+
+<body class="claro">
+<div id="map">
+    <div id="mapToolbar"></div>
+</div>
+</body>
+</html>

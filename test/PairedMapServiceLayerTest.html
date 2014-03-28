@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no"/>
+    <title>LayerCollection Test</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.8/js/esri/css/esri.css">
+    <style>
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background-color: #FFF;
+            overflow: hidden;
+            font-family: "Trebuchet MS";
+        }
+    </style>
+    <script>
+        var dojoConfig = {
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+                {
+                    name: "app",
+                    location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+                }],
+
+            //app-specific config values
+            app: {
+                loglevel: 4
+            }
+        };
+    </script>
+    <script src="http://js.arcgis.com/3.8/" data-dojo-config="parseOnLoad: false, async: 1"></script>
+    <script>
+        require([
+            "ngdc/Logger",
+            "ngdc/layers/PairedMapServiceLayer",
+            "esri/layers/layer",
+            "esri/layers/ArcGISTiledMapServiceLayer",
+            "esri/layers/ArcGISDynamicMapServiceLayer",
+            "dojo/_base/config",
+            "dojo/io-query",
+            "dojo/_base/lang",
+            "dojo/_base/array",
+            "esri/map",
+            "dojo/on",
+            "dojo/domReady!"],
+                function(
+                        Logger,
+                        PairedMapServiceLayer,
+                        Layer,
+                        ArcGISTiledMapServiceLayer,
+                        ArcGISDynamicMapServiceLayer,
+                        config,
+                        ioQuery,
+                        lang,
+                        array,
+                        Map,
+                        on){
+
+                    //add queryParams into config object
+                    var queryParams = ioQuery.queryToObject(location.search.substring(1));
+
+                    //values in queryParams take precedence
+                    lang.mixin(config.app, queryParams);
+
+                    //put the logger into global so all modules have access
+                    window.logger = new Logger(config.app.loglevel);
+
+                    var map = new Map("map", {
+                        basemap: "oceans",
+                        center: [-122.45,37.75], // long, lat
+                        zoom: 3,
+                        sliderStyle: "small"
+                    });
+
+                    var mapServices = [
+                        new ArcGISTiledMapServiceLayer("http://maps.ngdc.noaa.gov/arcgis/rest/services/web_mercator/multibeam/MapServer", {
+                            id: "Multibeam (tiled)",
+                            visible: false,
+                            opacity: 1
+                        }),
+                        new ArcGISDynamicMapServiceLayer("http://maps.ngdc.noaa.gov/arcgis/rest/services/web_mercator/multibeam_dynamic/MapServer", {
+                            id: "Multibeam (dynamic)",
+                            visible: false,
+                            opacity: 1,
+                            imageParameters: this.imageParametersPng32
+                        })
+                    ];
+
+                    on(map, "layers-add-result", lang.hitch(this, mapReady));
+                    map.addLayers(mapServices);
+
+
+                    function mapReady(layersAddResult) {
+                        logger.debug("added "+layersAddResult.layers.length+" layers");
+
+                        var pairedMapServiceLayer = new PairedMapServiceLayer({
+                            id: "Multibeam",
+                            tiledService: mapServices[0],
+                            dynamicService: mapServices[1],
+                            visible: true,
+                            cutoffZoom: 5
+                        }, map);
+                        console.log("pairedMapServiceLayer: ",pairedMapServiceLayer);
+                        // console.log(pairedMapServiceLayer.visible);
+                    }
+                });
+
+    </script>
+</head>
+<body>
+<h1>PairedMapServiceLayer Test</h1>
+<div id="map"></div>
+</body>
+</html>

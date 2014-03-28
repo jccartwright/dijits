@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CoordinatesToolbar Test</title>
+    <script>
+        var dojoConfig = {
+            parseOnLoad: false,
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+            {
+                name: "app",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+            }],
+
+            //app-specific config values
+            app: {
+                loglevel: 2
+            }
+        };
+    </script>
+    <script src="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/"></script>
+    <link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/dojo/1.8.3/dijit/themes/claro/claro.css" media="screen">
+    <link rel="stylesheet" href="http://serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/esri/css/esri.css">
+    <link rel="stylesheet" href="js/ngdc/css/CoordinatesToolbar.css">
+    <style>
+        #coordinatesToolbar {
+        position: absolute;
+        left: 40px;
+        bottom: 40px;
+        z-index: 100;
+        }
+        html, body, #map {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+        }
+    </style>
+    <script>
+        require(["ngdc/Logger", "ngdc/CoordinatesToolbar", "ngdc/MapConfig", "esri/map", "dojo/_base/config", "dojo/io-query",
+                 "app/AppLayerCollection", "dojo/topic", "dojo/_base/lang","dojo/parser", "dojo/_base/unload", "dojo/domReady!"],
+            function(Logger, CoordinatesToolbar, MapConfig, Map, config, ioQuery, AppLayerCollection, topic, lang, parser, unload){
+                parser.parse();
+
+                //add queryParams into config object
+                var queryParams = ioQuery.queryToObject(location.search.substring(1));
+
+                 //values in queryParams take precedence
+                 lang.mixin(config.app, queryParams);
+
+                //put the logger into global so all modules have access
+                window.logger = new Logger(config.app.loglevel);
+
+                //creates Map, AppLayerCollection
+                var mapConfig = new MapConfig("map", {
+                    center:[-102,40],
+                    zoom: 5,
+                    logo: false
+                }, new AppLayerCollection());
+
+                var coordinatesToolbar = new CoordinatesToolbar({map:mapConfig.map}, "coordinatesToolbar");
+
+                var handle = topic.subscribe("/ngdc/mouseposition", function(mapPoint) {
+//                    console.log("Position: " + mapPoint.x.toFixed(3) + ", " + mapPoint.y.toFixed(3));
+                });
+
+                unload.addOnUnload(function(){
+                    handle.remove();
+                });
+            }
+        );
+
+    </script>
+</head>
+<body class="claro">
+<div id="map">
+    <div id="coordinatesToolbar"></div>
+</div>
+</body>
+</html>

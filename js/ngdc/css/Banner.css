@@ -1,0 +1,69 @@
+.banner {
+    font-size: 10px;
+    font-family: verdana, arial, helvetica, sans-serif;
+    color:#0000ff;
+    margin: 2px;
+}
+
+.banner-upper {
+    background-color: white;
+}
+
+.banner-lower {
+    background-color: #e5e5e5;
+}
+
+table.banner {
+    border: 0;
+    padding:0;
+    width:100%;
+    margin:0;
+}
+
+td.banner {
+    margin-left:2px;
+    margin-right:2px;
+    padding:0px;
+    background:#e5e5e5;
+}
+
+a.banner:link {
+    text-decoration:none;
+}
+
+a.banner:visited {
+    text-decoration:none;
+}
+
+a.banner:hover {
+    color:red;
+}
+
+a.banner:active {
+    text-decoration:none;
+}
+
+a.topnav:link {
+    font:11px verdana, arial, helvetica, sans-serif;
+    color:#000099;
+    text-decoration:none;
+}
+
+a.topnav:visited {
+    font:11px verdana, arial, helvetica, sans-serif;
+    color:#000066;
+    text-decoration:none;
+}
+
+a.topnav:hover {
+    font:11px verdana, arial, helvetica, sans-serif;
+    color:#0000ff;
+    background: #eeeeee;
+}
+
+a.topnav:active {
+    font:11px verdana, arial, helvetica, sans-serif;
+    color:#000066;
+    text-decoration:none;
+}
+

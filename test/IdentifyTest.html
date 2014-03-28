@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Identify Test</title>
+    <script>
+        var dojoConfig = {
+            parseOnLoad: false,
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+            {
+                name: "app",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+            }],
+
+            //app-specific config values
+            app: {
+                loglevel: 2
+            }
+        };
+    </script>
+    <!--<script src="//localhost/~jcc/dojo/dojo/dojo.js"></script>-->
+    <script src="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/"></script>
+    <link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/dojo/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/js/esri/css/esri.css">
+    <link rel="stylesheet" href="js/ngdc/css/BasemapToolbar.css">
+    <style>
+        html, body, #map {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+        }
+    </style>
+    <script>
+        require(["ngdc/Logger", "ngdc/Identify", "ngdc/MapConfig", "app/AppLayerCollection", "dojo/_base/config", "dojo/io-query",
+            "dojo/topic", "dojo/_base/lang", "dojo/parser", "dojo/domReady!"],
+            function(Logger, Identify, MapConfig, AppLayerCollection, config, ioQuery, topic, lang, parser){
+                parser.parse();
+
+                //add queryParams into config object
+                var queryParams = ioQuery.queryToObject(location.search.substring(1));
+
+                //values in queryParams take precedence
+                lang.mixin(config.app, queryParams);
+
+                //put the logger into global so all modules have access
+                window.logger = new Logger(config.app.loglevel);
+
+                logger.debug('creating mapConfig...');
+                //creates Map, AppLayerCollection
+                var mapConfig = new MapConfig("map", {
+                    center:[-102,40],
+                    zoom: 5,
+                    logo: false
+                }, new AppLayerCollection());
+                logger.debug('creating Identify dijit...');
+                var identify = new Identify({map: mapConfig.map});
+                console.debug('created Identify dijit:',identify);
+            }
+        );
+    </script>
+</head>
+<body class="claro">
+<div id="map">
+</div>
+</body>
+</html>

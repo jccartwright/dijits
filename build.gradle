@@ -1,0 +1,14 @@
+apply plugin: 'java'
+
+defaultTasks 'jar'
+
+group = 'ngdc.gis'
+version = '2.0-SNAPSHOT'
+
+jar {
+    from "."
+    exclude 'README.md'
+    exclude 'build*'
+    exclude 'test'
+    exclude '.gradle'
+}

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Logger Test</title>
+    <script>
+        var dojoConfig = {
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            }],
+
+            //app-specific config values
+            app: {
+                loglevel: 2
+            }
+        };
+    </script>
+    <script src="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/" data-dojo-config="parseOnLoad: false, async: 1"></script>
+    <script>
+        require(["ngdc/Logger", "dojo/_base/config", "dojo/io-query", "dojo/_base/lang", "dojo/domReady!"],
+                function(Logger, config, ioQuery, lang){
+
+                    //add queryParams into config object
+                    var queryParams = ioQuery.queryToObject(location.search.substring(1));
+
+                    //values in queryParams take precedence
+                    lang.mixin(config.app, queryParams);
+
+                    console.log("Log Level: "+config.app.loglevel);
+
+                    var log = new Logger(config.app.loglevel);
+                    log.debug('this is debug');
+                    log.info('this is info');
+                    log.warn('this is a warning');
+                    log.error('this is an error');
+                });
+    </script>
+</head>
+<body>
+<h1>Logger Test</h1>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LayerCollection Test</title>
+    <script>
+        var dojoConfig = {
+            waitSeconds: 5,
+            async: true,
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+            {
+                name: "app",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+            }],
+
+            //app-specific config values
+            app: {
+                loglevel: 2
+            }
+        };
+    </script>
+    <script src="//serverapi.arcgisonline.com/jsapi/arcgis/3.4/" data-dojo-config="parseOnLoad: false, async: 1"></script>
+    <script>
+        require(["ngdc/Logger", "ngdc/layers/LayerCollection", "app/AppLayerCollection", "esri/layers/ArcGISTiledMapServiceLayer", "dojo/_base/config", "dojo/io-query", "dojo/_base/lang", "dojo/domReady!"],
+                function(Logger, LayerCollection, AppLayerCollection, ArcGISTiledMapServiceLayer, config, ioQuery, lang){
+
+                    //add queryParams into config object
+                    var queryParams = ioQuery.queryToObject(location.search.substring(1));
+
+                    //values in queryParams take precedence
+                    lang.mixin(config.app, queryParams);
+
+                    var mapServices = [
+                        new esri.layers.ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer", {
+                            id: "NatGeo Overview",
+                            visible: false,
+                            opacity: 1
+                        }),
+                        new esri.layers.ArcGISTiledMapServiceLayer("http://maps.ngdc.noaa.gov/rest/services/web_mercator/gebco08_hillshade/MapServer", {
+                            id: "GEBCO_08 (tiled)",
+                            visible: false,
+                            opacity: 1
+                        }),
+                        new esri.layers.ArcGISTiledMapServiceLayer("http://services.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer", {
+                            id: "Ocean Basemap",
+                            visible: false,
+                            opacity: 1
+                        })
+                    ];
+
+                    var layerCollection = new LayerCollection(mapServices);
+                    console.log(layerCollection.getLayerById('GEBCO_08 (tiled)'));
+
+                    var myLayerCollection = new AppLayerCollection();
+                    console.log(myLayerCollection.getLayerById('Ocean Basemap'));
+                    console.log("number of layers defined in this collection: "+myLayerCollection.mapServices.length);
+                    console.log(myLayerCollection.imageParameters.png32);
+
+                    myLayerCollection.sayHello();
+
+                });
+    </script>
+</head>
+<body>
+<h1>LayerCollection Test</h1>
+</body>
+</html>

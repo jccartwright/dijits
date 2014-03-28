@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>IdentifyPane Test</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/dojo/dijit/themes/tundra/tundra.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.7/js/esri/css/esri.css">
+    <link rel="stylesheet" href="js/ngdc/css/BasemapToolbar.css">
+    <link rel="stylesheet" href="js/ngdc/css/MapToolbar.css">
+    <link rel="stylesheet" href="js/ngdc/identify/IdentifyPane.css">
+    <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dojox/layout/resources/FloatingPane.css"/>
+    <link rel="stylesheet" type="text/css" href="http://js.arcgis.com/3.7/js/dojo/dojox/layout/resources/ResizeHandle.css"/>
+    <link rel="stylesheet" href="css/local.css">
+    <style>
+
+
+        #mapToolbar {
+            position: absolute;
+            left: 80px;
+            top: 20px;
+            z-index: 100;
+        }
+
+        #basemapToolbar {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 100;
+        }
+
+        #coordinatesToolbar {
+            position: absolute;
+            left: 15px;
+            bottom: 15px;
+            z-index: 100;
+        }
+    </style>
+    <link rel="stylesheet" href="js/ngdc/css/Banner.css">
+    <link rel="stylesheet" href="js/app/css/CreditsPanel.css">
+    <link rel="stylesheet" href="js/ngdc/css/MapToolbar.css">
+    <link rel="stylesheet" href="js/ngdc/css/CoordinatesToolbar.css">
+
+    <script>
+        var dojoConfig = {
+            waitSeconds: 5,
+            async: true,
+            parseOnLoad: false,
+
+            //list local packages
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+                {
+                    name: "app",
+                    location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+                }
+            ],
+
+            //app-specific config values
+            app: {
+                loglevel: 4  //DEBUG
+            }
+        };
+    </script>
+    <script src="http://js.arcgis.com/3.7/"></script>
+    <script>
+
+        require(
+                [
+                    "ngdc/Logger", "ngdc/web_mercator/MapConfig", "ngdc/MapToolbar", "ngdc/BasemapToolbar", "ngdc/CoordinatesToolbar",
+                    "app/CreditsPanel", "app/identify/AppLayerCollection", "app/identify/IdentifyPaneTest",
+                    "ngdc/identify/IdentifyPane",
+                    "dojo/_base/config", "dojo/io-query", "dojo/_base/lang", "dojo/dom", "dojo/_base/fx",
+                    "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer",
+                    "dojo/topic", "dojo/on", "dojo/aspect", "dojo/parser", "dojo/domReady!"
+                ],
+                function(Logger, MapConfig, MapToolbar, BasemapToolbar, CoordinatesToolbar,
+                         CreditsPanel, AppLayerCollection, Identify, IdentifyPane,
+                         config, ioQuery, lang, dom, baseFx,
+                         BorderContainer, ContentPane, AccordionContainer,
+                         topic, on, aspect, parser) {
+                    parser.parse();
+
+                    //add queryParams into config object, values in queryParams take precedence
+                    var queryParams = ioQuery.queryToObject(location.search.substring(1));
+                    lang.mixin(config.app, queryParams);
+
+                    //put the logger into global so all modules have access
+                    window.logger = new Logger(config.app.loglevel);
+
+                    //fade out the loader, exposing the layout
+                    var loader = dom.byId("loader");
+                    baseFx.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
+
+                    //create Map and add layers
+                    var mapConfig = new MapConfig("mapDiv", {
+                        center:[-102,40],
+                        zoom: 5,
+                        logo: false,
+                        overview: true
+                    }, new AppLayerCollection());
+
+                    var mapToolbar = new MapToolbar({map: mapConfig.map}, "mapToolbar");
+
+                    var basemapToolbar = new BasemapToolbar({layerCollection: mapConfig.mapLayerCollection}, "basemapToolbar");
+                    basemapToolbar.startup();
+
+                    var coordinatesToolbar = new CoordinatesToolbar({map: mapConfig.map}, "coordinatesToolbar");
+
+                    var identify = new Identify({map: mapConfig.map, layerCollection: mapConfig.mapLayerCollection});
+
+                    var identifyPane = new IdentifyPane({
+                        map: mapConfig.map,
+                        class: "identifyPane"
+                    }, dom.byId("identifyPaneDiv"));
+
+                    identifyPane.startup();
+
+                    mapConfig.map.identifyPane = identifyPane;
+                }
+        );
+    </script>
+</head>
+<body class="tundra">
+<div id="loader"><div id="loaderInner"><br><br>LOADING...</div></div>
+
+<div id="mainWindow" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline', gutters:false">
+
+    <div id="header" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+        <div id="banner" data-dojo-type="ngdc/Banner"></div>
+    </div>
+
+    <div id="rightPane" data-dojo-type="dijit/layout/AccordionContainer" data-dojo-props="region:'right', splitter:true">
+        <div id="layersPanel" data-dojo-type="dijit/layout/ContentPane" title="Layers">
+        </div>
+        <div id="legendPanel" data-dojo-type="dijit/layout/ContentPane" title="Legend">
+        </div>
+        <div id="aboutPanel" data-dojo-type="dijit/layout/ContentPane" title="More Information">
+            <div id="credits" data-dojo-type="app/CreditsPanel"></div>
+        </div>
+        <div id="helpPanel" dojoType="dijit/layout/ContentPane" title="Help">
+        </div>
+    </div> <!-- end rightPane -->
+
+    <div id="centerPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+        <div id="mapDiv" data-dojo-type="dijit/layout/ContentPane">
+            <div id="mapToolbar"></div>
+            <div id="basemapToolbar"></div>
+            <div id="coordinatesToolbar"></div>
+        </div>
+    </div> <!-- end centerPane -->
+
+    <div id="footer" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+        <!-- for testing only -->
+        <input id="execute1" type="button" value="testme1">
+        <input id="execute2" type="button" value="testme2">
+
+    </div>
+</div> <!-- end mainWindow BorderContainer -->
+<div id="identifyPaneDiv"></div>
+</body>
+</html>

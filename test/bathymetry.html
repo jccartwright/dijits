@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sample Map Viewer</title>
+    <link rel="stylesheet" href="http://js.arcgis.com/3.6/js/dojo/dijit/themes/tundra/tundra.css" />
+    <link rel="stylesheet" href="http://js.arcgis.com/3.6/js/esri/css/esri.css">
+    <link rel="stylesheet" href="js/ngdc/css/BasemapToolbar.css">
+    <link rel="stylesheet" href="js/ngdc/css/MapToolbar.css">
+    <style>
+        html,body {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #mainWindow {
+            width:100%;
+            height:100%;
+        }
+
+        #header {
+            height: 75px;
+            background-color: gray;
+            /*background-image: url(http://www.ngdc.noaa.gov/images/NGDCBanner.png);*/
+            /*background-repeat: no-repeat;*/
+
+        }
+
+        #rightPane {
+            width: 250px;
+        }
+
+        #footer {
+            height: 25px;
+            background-color: gray;
+        }
+
+        #loader {
+            padding: 0;
+            margin: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #efefef;
+            opacity: 0.98;
+            z-index: 999;
+            vertical-align: middle;
+            background-color: white;
+        }
+
+        #loaderInner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 32px;
+            height: 32px;
+            margin-top: -16px;
+            margin-left: -16px;
+            background-image: url('http://maps.ngdc.noaa.gov/viewers/common/2.8/images/loading.gif');
+            background-repeat: no-repeat;
+        }
+
+        #mapToolbar {
+            position: absolute;
+            left: 80px;
+            top: 20px;
+            z-index: 100;
+        }
+
+        #basemapToolbar {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            z-index: 100;
+        }
+
+        #coordinatesToolbar {
+            position: absolute;
+            left: 15px;
+            bottom: 15px;
+            z-index: 100;
+        }
+    </style>
+    <link rel="stylesheet" href="js/bathymetry/css/CreditsPanel.css">
+    <link rel="stylesheet" href="js/ngdc/css/MapToolbar.css">
+    <link rel="stylesheet" href="js/ngdc/css/CoordinatesToolbar.css">
+
+    <script>
+        var dojoConfig = {
+            waitSeconds: 5,
+            async: true,
+            parseOnLoad: false,
+
+            //list local packages
+            packages: [{
+                name: "ngdc",
+                location: location.pathname.replace(/\/[^/]*$/, '') + '/js/ngdc'
+            },
+                {
+                    name: "app",
+                    location: location.pathname.replace(/\/[^/]*$/, '') + '/js/app'
+                },
+                {
+                    name: "bathymetry",
+                    location: location.pathname.replace(/\/[^/]*$/, '') + '/js/bathymetry'
+                }
+            ],
+
+            //app-specific config values
+            app: {
+                loglevel: 4  //DEBUG
+            }
+        };
+    </script>
+    <script src="http://js.arcgis.com/3.6/"></script>
+    <script>
+
+        require(
+                [
+                    "ngdc/Logger", "ngdc/MapConfig", "ngdc/MapToolbar", "ngdc/BasemapToolbar", "ngdc/CoordinatesToolbar",
+                    "bathymetry/CreditsPanel", "bathymetry/AppLayerCollection", "bathymetry/Identify",
+                    "dojo/_base/config", "dojo/io-query", "dojo/_base/lang", "dojo/dom", "dojo/_base/fx",
+                    "dijit/layout/BorderContainer", "dijit/layout/ContentPane", "dijit/layout/AccordionContainer", "dojo/topic",
+                    "dojo/parser", "dojo/domReady!"
+                ],
+                function(Logger, MapConfig, MapToolbar, BasemapToolbar, CoordinatesToolbar, CreditsPanel, AppLayerCollection, Identify, config, ioQuery, lang, dom,
+                         baseFx, BorderContainer, ContentPane, AccordionContainer, topic, parser) {
+                    parser.parse();
+
+                    //add queryParams into config object, values in queryParams take precedence
+                    var queryParams = ioQuery.queryToObject(location.search.substring(1));
+                    lang.mixin(config.app, queryParams);
+
+                    //put the logger into global so all modules have access
+                    window.logger = new Logger(config.app.loglevel);
+
+                    //fade out the loader, exposing the layout
+                    var loader = dom.byId("loader");
+                    baseFx.fadeOut({ node: loader, duration: 500, onEnd: function(){ loader.style.display = "none"; }}).play();
+
+                    //create Map and add layers
+                    var mapConfig = new MapConfig("map", {
+                        center:[-102,40],
+                        zoom: 5,
+                        logo: false
+                    }, new AppLayerCollection());
+
+                    var mapToolbar = new MapToolbar({map: mapConfig.map}, "mapToolbar");
+
+                    var basemapToolbar = new BasemapToolbar({layerCollection: mapConfig.mapLayerCollection}, "basemapToolbar");
+                    basemapToolbar.startup();
+
+                    var coordinatesToolbar = new CoordinatesToolbar({map: mapConfig.map}, "coordinatesToolbar");
+
+                    var identify = new Identify({map: mapConfig.map, layerCollection: mapConfig.mapLayerCollection});
+
+                    topic.subscribe("/identify/results", function(results){
+                        console.log('identify results: ', results.results);
+                    });
+                }
+        );
+    </script>
+</head>
+<body class="tundra">
+<div id="loader"><div id="loaderInner"><br><br>LOADING...</div></div>
+
+<div id="mainWindow" data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline', gutters:false">
+
+    <div id="header" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+        HEADER
+    </div>
+
+    <div id="rightPane" data-dojo-type="dijit/layout/AccordionContainer" data-dojo-props="region:'right', splitter:true">
+        <div id="layersPanel" data-dojo-type="dijit/layout/ContentPane" title="Layers">
+        </div>
+        <div id="legendPanel" data-dojo-type="dijit/layout/ContentPane" title="Legend">
+        </div>
+        <div id="aboutPanel" data-dojo-type="dijit/layout/ContentPane" title="More Information">
+            <div id="credits" data-dojo-type="bathymetry/CreditsPanel"></div>
+        </div>
+        <div id="helpPanel" dojoType="dijit/layout/ContentPane" title="Help">
+        </div>
+    </div> <!-- end rightPane -->
+
+    <div id="centerPane" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+        <div id="map" data-dojo-type="dijit/layout/ContentPane">
+            <div id="mapToolbar"></div>
+            <div id="basemapToolbar"></div>
+            <div id="coordinatesToolbar"></div>
+        </div>
+    </div> <!-- end centerPane -->
+
+    <div id="footer" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'bottom'">
+        FOOTER
+    </div>
+</div> <!-- end mainWindow BorderContainer -->
+</body>
+</html>
