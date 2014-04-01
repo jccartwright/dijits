@@ -4,7 +4,8 @@ defaultTasks 'clean', 'jar'
 
 group = 'ngdc.gis'
 version = '2.0-SNAPSHOT'
-archivesBaseName = project.name
+//archivesBaseName = project.name
+archivesBaseName = 'dijits'
 
 jar {
     from "."
