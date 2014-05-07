@@ -5,14 +5,32 @@
     font-size: small;
 }
 
+.identifyByPointIcon {
+    background-image: url(../images/cursor.png);
+    width: 16px;
+    height: 16px;
+}
+
 .identifyByRectIcon {
-    background-image: url(../images/identify_rect.png);
+    background-image: url(../images/layer-shape.png);
     width: 16px;
     height: 16px;
 }
 
 .identifyByCoordsIcon {
-    background-image: url(../images/identify_xy.png);
+    background-image: url(../images/layer-shape-xy.png);
     width: 16px;
     height: 16px;
 }
+
+.identifyByPolygonIcon {
+    background-image: url(../images/layer-shape-polygon.png);
+    width: 16px;
+    height: 16px;
+}
+
+#identifyLabelDiv {
+    display: inline-flex;
+}
+
+

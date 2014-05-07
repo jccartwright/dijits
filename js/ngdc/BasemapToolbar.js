@@ -33,6 +33,13 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 this.aoiSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
                     new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2),
                     new Color([255, 255, 0, 0.25]));
+
+                //Listen for an Escape keypress, which should deactivate any draw action
+                on(this.map, "key-down", lang.hitch(this, function(evt) {
+                    if (evt.keyCode == 27 /*Esc key*/) {    
+                        this._drawToolbar.deactivate(); //Deactivate any existing draw
+                    }
+                }));
             },
 
             showBasemap: function(selectedIndex) {
@@ -96,6 +103,11 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                     this._addOverlayMenuItem(this.overlayMenu, item, idx, this);
                 }, this);
 
+                 //add menu items to overlay menu
+                array.forEach(this._identifyTools, function(item, idx) {
+                    this._addIdentifyMenuItem(this.identifyMenu, item, idx, this);
+                }, this);
+
                 this.showBasemap(this.defaultBasemapIndex);
             },
 
@@ -115,6 +127,17 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                     checked: layer.visible,
                     onClick: function() {
                         parent.toggleOverlay(idx);
+                    }
+                }));
+            },
+
+            _addIdentifyMenuItem: function(menu, item, idx, parent) {
+                menu.addChild(new MenuItem({
+                    label: item.label,
+                    iconClass: item.iconClass,
+                    onClick: function() {
+                        console.log(item.label + ' clicked');
+                        parent.identifyWithTool(item.id);
                     }
                 }));
             },
@@ -139,14 +162,45 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 });
             },
 
-            //attached to onClick event of identifyByRectButton
-            _identifyByRect: function(/*Event*/ evt) {
+            identifyWithTool: function(tool) {
+                this._drawToolbar.deactivate(); //Deactivate any existing draw
+
+                if (tool === 'point') {
+                    return; //Point tool is not really activated, it's just the default behavior of the map
+                }
+                else if (tool === 'coords') {
+                    this._identifyByCoords();
+                }
+                else {
+                    this._identifyByShape(tool);
+                }
+            },
+
+            _identifyByShape: function(shape) {
                 this.map.graphics.clear();
-                this._drawToolbar.activate(Draw.EXTENT);
+
+                if (shape == 'rect') {
+                    this._drawToolbar.activate(Draw.EXTENT);
+                }
+                else if (shape == 'polygon') {
+                    this._drawToolbar.activate(Draw.POLYGON);
+                }
+                else if (shape == 'freehand-polygon') {
+                    this._drawToolbar.activate(Draw.FREEHAND_POLYGON);
+                }
+                else if (shape == 'geodetic-circle') {
+                    //not yet implemented
+                }
+                else if (shape == 'planar-circle') {
+                    //not yet implemented
+                }
+                else {
+                    logger.warn('Unrecognized geometry type for identify: ' + shape);
+                }
+
                 this.map.hideZoomSlider();
             },
 
-            //attached to onClick event of identifyByRectButton
             _identifyByCoords: function(/*Event*/ evt) {
                 this.map.graphics.clear();
                 if (!this.bboxDialog) {
