@@ -19,6 +19,7 @@ define([
             mapServices: null,
             pairedMapServices: null,
             layerTimeouts: null,
+            name: null,
 
             //TODO still necessary?
             firstZoomLevel: 2,
@@ -57,7 +58,11 @@ define([
             },
 
             buildPairedMapServices: function(map) {
-                logger.debug('building '+this.pairedMapServices.length+' PairedMapServices...');
+                if (! this.pairedMapServices) {
+                    logger.debug("pairedMapServices list is null for "+this.name);
+                    return;
+                }
+                logger.debug('building '+this.pairedMapServices.length+' PairedMapServices for '+this.name+'...');
 
                 var layer;
                 array.forEach(this.pairedMapServices, function(layerDef){
@@ -69,7 +74,7 @@ define([
             },
 
             setLayerTimeouts: function() {
-                console.debug('setting layer timeouts...');
+                logger.debug('setting layer timeouts for '+this.name+'...');
                 //setup timeouts for each layer to load
                 this.layerTimeouts = {};
                 dojo.forEach(this.mapServices, function(svc) {
