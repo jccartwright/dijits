@@ -46,7 +46,7 @@ define([
 
             execute: function(formContents) {
                 var extent = new Extent(formContents.minx, formContents.miny, formContents.maxx, formContents.maxy, new SpatialReference({wkid: 4326}));
-                topic.publish("/ngdc/boundingBox", extent);
+                topic.publish("/ngdc/BoundingBoxDialog/extent", extent);
             },
            
             clear: function() {
@@ -57,7 +57,7 @@ define([
             },
 
             onCancel: function() {
-                topic.publish("/ngdc/boundingBoxCanceled");
+                topic.publish("/ngdc/BoundingBoxDialog/cancel");
             }
     });
 });
