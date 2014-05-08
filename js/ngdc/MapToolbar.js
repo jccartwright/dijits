@@ -30,6 +30,10 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 this._drawToolbar = new Draw(this.map);
                 Connect.connect(this._drawToolbar, "onDrawEnd", this, this._addAreaOfInterestToMap);
 
+                this.clickHandler = on.pausable(this.map, "click", function(evt) {
+                    topic.publish("/ngdc/mapPoint", evt.mapPoint);
+                });
+
                 this.aoiSymbol = new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
                     new SimpleLineSymbol(SimpleLineSymbol.STYLE_DASH, new Color([255, 0, 0]), 2),
                     new Color([255, 255, 0, 0.25]));
@@ -183,7 +187,8 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                     this._drawToolbar.activate(Draw.EXTENT);
                 }
                 else if (shape == 'polygon') {
-                    this._drawToolbar.activate(Draw.POLYGON);
+                    this.clickHandler.pause(); //Pause the map click event
+                    this._drawToolbar.activate(Draw.POLYGON);                    
                 }
                 else if (shape == 'freehand-polygon') {
                     this._drawToolbar.activate(Draw.FREEHAND_POLYGON);
@@ -207,7 +212,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                     this.bboxDialog = new BoundingBoxDialog({map: this.map});
                 }
                 this.bboxDialog.show();
-            },
+            },            
 
             //attached to onDrawEnd event
             _addAreaOfInterestToMap: function(/*Geometry*/ geometry) {
@@ -218,12 +223,14 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 this._drawToolbar.deactivate();
                 this.map.showZoomSlider();
 
-                topic.publish("/ngdc/boundingBox", this.extentToGeographic(geometry));
+                topic.publish("/ngdc/geometry", this.geometryToGeographic(geometry));
+
+                this.clickHandler.resume(); //Resume map click events if they were paused
             },
 
-            extentToGeographic: function(extent) {
+            geometryToGeographic: function(geometry) {
                 //already in geographic - no conversion necessary
-                return(extent);
+                return(geometry);
             }
         });
     }
