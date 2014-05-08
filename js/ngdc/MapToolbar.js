@@ -57,34 +57,44 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
             },
 
             showBasemap: function(selectedIndex) {
+
                 //only one basemap showing at a time
                 array.forEach(this._basemaps, function(basemap, idx) {
-                    if (selectedIndex == idx) {
-                        array.forEach(basemap.services, function(targetId){
-                            this.layerCollection.getLayerById(targetId).setVisibility(true);
-                            this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = "bold";
-                        }, this);
-                    } else {
-                        array.forEach(basemap.services, function(targetId){
-                            this.layerCollection.getLayerById(targetId).setVisibility(false);
-                            this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = "normal";
-                        }, this);
+                    if (selectedIndex == idx) {        
+                        //Show the basemap base                
+                        this.layerCollection.getLayerById(basemap.base).setVisibility(true);
+                                                
+                        //Set the Boundaries/Labels checkbox to use the currently-selected overlay(s)
+                        this._overlays[this.defaultBoundariesIndex].services = basemap.overlays;
+
+                        this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = "bold";
+                    } 
+                    else {
+                        //Hide the base and overlays
+                        this.layerCollection.getLayerById(basemap.base).setVisibility(false);
+                        array.forEach(basemap.overlays, lang.hitch(this, function(overlay) {
+                            this.layerCollection.getLayerById(overlay).setVisibility(false);
+                        }));
+
+                        this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = "normal";
                     }
                 }, this);
 
-                //Enable/disable the Boundaries/Labels checkbox
                 var menuItem = this.overlayMenu.getChildren()[this.defaultBoundariesIndex];
-                if (this._basemaps[selectedIndex].boundariesEnabled) {
+                if (this._basemaps[selectedIndex].overlays) {
+                    //If the current basemap has overlay(s), enable the Boundaries/Labels checkbox
                     menuItem.set('disabled', false);
                     domClass.remove(menuItem.domNode, "dijitMenuItemDisabled");  //Manually gray out the MenuItem (tundra.css is missing dijitCheckedMenuItemDisabled)
+                    
+                    //If the Boundaries/Labels checkbox is checked, show the current overlay(s)
                     if (menuItem.checked) {
                         this.setOverlayVisibility(this.defaultBoundariesIndex, true);
                     }
                 }
                 else {
+                    //Disable the Boundaries/Labels checkbox
                     menuItem.set('disabled', true);
                     domClass.add(menuItem.domNode, "dijitMenuItemDisabled");
-                    this.setOverlayVisibility(this.defaultBoundariesIndex, false);
                 }
             },
 
