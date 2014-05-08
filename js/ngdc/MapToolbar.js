@@ -44,6 +44,16 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                         this._drawToolbar.deactivate(); //Deactivate any existing draw
                     }
                 }));
+
+                topic.subscribe('/ngdc/BoundingBoxDialog/cancel', lang.hitch(this, function() {
+                    //BoundingBoxDialog canceled, switch to pointer icon
+                    this._setIdentifyIcon('identifyByPointIcon');
+                }));
+
+                topic.subscribe('/ngdc/BoundingBoxDialog/extent', lang.hitch(this, function(extent) {
+                    //BoundingBoxDialog passed an extent. Add to map and identify.
+                    this._addAreaOfInterestToMap(extent);
+                }));
             },
 
             showBasemap: function(selectedIndex) {
@@ -140,7 +150,6 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                     label: item.label,
                     iconClass: item.iconClass,
                     onClick: function() {
-                        console.log(item.label + ' clicked');
                         parent.identifyWithTool(item.id);
                     }
                 }));
@@ -170,9 +179,11 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 this._drawToolbar.deactivate(); //Deactivate any existing draw
 
                 if (tool === 'point') {
+                    this._setIdentifyIcon('identifyByPointIcon');
                     return; //Point tool is not really activated, it's just the default behavior of the map
                 }
                 else if (tool === 'coords') {
+                    this._setIdentifyIcon('identifyByCoordsIcon');
                     this._identifyByCoords();
                 }
                 else {
@@ -184,13 +195,16 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 this.map.graphics.clear();
 
                 if (shape == 'rect') {
+                    this._setIdentifyIcon('identifyByRectIcon');
                     this._drawToolbar.activate(Draw.EXTENT);
                 }
                 else if (shape == 'polygon') {
+                    this._setIdentifyIcon('identifyByPolygonIcon');
                     this.clickHandler.pause(); //Pause the map click event
                     this._drawToolbar.activate(Draw.POLYGON);                    
                 }
                 else if (shape == 'freehand-polygon') {
+                    this._setIdentifyIcon('identifyByPolygonIcon');
                     this._drawToolbar.activate(Draw.FREEHAND_POLYGON);
                 }
                 else if (shape == 'geodetic-circle') {
@@ -204,6 +218,11 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 }
 
                 this.map.hideZoomSlider();
+            },
+
+            _setIdentifyIcon: function(iconClass) {
+                domClass.replace('identifyIcon', iconClass, 
+                    ['identifyByPointIcon', 'identifyByRectIcon', 'identifyByCoordsIcon', 'identifyByPolygonIcon']);
             },
 
             _identifyByCoords: function(/*Event*/ evt) {
@@ -226,6 +245,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 topic.publish("/ngdc/geometry", this.geometryToGeographic(geometry));
 
                 this.clickHandler.resume(); //Resume map click events if they were paused
+                domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
             },
 
             geometryToGeographic: function(geometry) {
