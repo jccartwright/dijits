@@ -1,7 +1,18 @@
 <div class="${baseClass}">
-<div data-dojo-type="dijit/Toolbar" data-dojo-props="layoutAlign:'left'">
-    <div data-dojo-type="dijit/form/Button" data-dojo-attach-point="selectByRectButton"
-         data-dojo-attach-event="onClick:_selectByRect"
-         data-dojo-props="iconClass:'selectByRectIcon', showLabel:false">Identify data by drawing a rectangle</div>
-</div>
+    <div data-dojo-attach-point="mapToolbar" data-dojo-type="dijit/Toolbar" data-dojo-props="layoutAlign:'left'">
+        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">            
+            <span><div id="identifyLabelDiv">Identify&nbsp;<div id="identifyIcon" class="identifyByPointIcon"></div></img></div></span>
+            <div data-dojo-attach-point="identifyMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+        <span data-dojo-type="dijit/ToolbarSeparator"></span>
+        <div data-dojo-attach-point="basemapDropDown" data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">
+            <span>Basemap</span>
+            <div data-dojo-attach-point="basemapMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+        <span data-dojo-type="dijit/ToolbarSeparator"></span>
+        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">
+            <span>Options</span>
+            <div data-dojo-attach-point="overlayMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+    </div>
 </div>

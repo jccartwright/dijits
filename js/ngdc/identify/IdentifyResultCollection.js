@@ -19,7 +19,18 @@ define(["dojo/_base/declare", "dojo/_base/array", "esri/tasks/IdentifyResult", "
 
             setSearchGeometry: function(geometry) {
                 this.searchGeometry = geometry;
-                this.anchorPoint = (geometry.type === 'point') ? geometry : geometry.getCenter();
+                if (geometry.type === 'point') {
+                    this.anchorPoint = geometry;
+                }
+                else if (geometry.type === 'extent') {
+                    this.anchorPoint = geometry.getCenter();
+                }
+                else if (geometry.type === 'polygon') {
+                    this.anchorPoint = geometry.getCentroid();
+                }
+                else {
+                    logger.warn('setSearchGeometry: unrecognized geometry type: ' + geometry.type);
+                }
             },
 
 

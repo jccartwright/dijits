@@ -1,36 +1,14 @@
 define([
-    "dojo/_base/declare",
-    "dijit/Dialog",
-    "dijit/_Widget",
-    "dijit/_TemplatedMixin",
-    "dijit/_WidgetsInTemplateMixin",
-    "dijit/form/Button",
-    "dijit/form/NumberTextBox",
-    "dojo/_base/lang",
-    "dojo/_base/array",
-    "dojo/dom-attr",
-    "dojo/on",
-    "dojo/topic",
-    "esri/geometry/Extent", 
-    "esri/SpatialReference",
-    "dojo/text!./templates/BoundingBoxDialog.html"
+    "dojo/_base/declare", "dijit/Dialog", "dijit/_Widget", "dijit/_TemplatedMixin", "dijit/_WidgetsInTemplateMixin",
+    "dijit/form/Button", "dijit/form/NumberTextBox", "dojo/_base/lang", "dojo/_base/array",
+    "dojo/dom-attr", "dojo/on", "dojo/topic", "esri/geometry/Extent", 
+    "esri/SpatialReference", "dojo/text!./templates/BoundingBoxDialog.html"
     ],
     function(
-        declare,
-        Dialog,
-        _Widget,
-        _TemplatedMixin,
-        _WidgetsInTemplateMixin,
-        Button,
-        NumberTextBox,
-        lang,
-        array,
-        domAttr,
-        on,
-        topic,
-        Extent,
-        SpatialReference,
-        template 
+        declare, Dialog, _Widget, _TemplatedMixin, _WidgetsInTemplateMixin,
+        Button, NumberTextBox, lang, array,
+        domAttr, on, topic, Extent,
+        SpatialReference, template 
     ){
         return declare([Dialog, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -43,21 +21,7 @@ define([
             constructor: function(/*Object*/ kwArgs) {
                 console.log("inside BoundingBoxDialog constructor...");
                 lang.mixin(this, kwArgs);
-
-
-                // var contentWidget = new (declare([_Widget, _TemplatedMixin, _WidgetsInTemplateMixin], {
-                //     templateString: template
-                // }));
-                // contentWidget.startup();
-                // this.content = contentWidget;
-
-                
             },
-
-            // buildRendering: function(){
-            //     this.templateString = lang.replace(this.templateString, [template]);
-            //     this.inherited(arguments);
-            // },
 
             postCreate: function() {
                 this.inherited(arguments);
@@ -81,22 +45,19 @@ define([
             },
 
             execute: function(formContents) {
-
                 var extent = new Extent(formContents.minx, formContents.miny, formContents.maxx, formContents.maxy, new SpatialReference({wkid: 4326}));
-
-                topic.publish("/ngdc/boundingBox", extent);
-
-
-                //console.log(state);
+                topic.publish("/ngdc/BoundingBoxDialog/extent", extent);
             },
-
-
-                        
+           
             clear: function() {
                 this.minxInput.set('value', '');
                 this.maxxInput.set('value', '');
                 this.minyInput.set('value', '');
                 this.maxyInput.set('value', '');
+            },
+
+            onCancel: function() {
+                topic.publish("/ngdc/BoundingBoxDialog/cancel");
             }
     });
 });

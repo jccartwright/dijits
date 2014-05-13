@@ -29,9 +29,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Defe
 
                 this._map = params[0].mapConfig.map;
 
-                this._map.on("click", lang.hitch(this, "identifyPoint"));
-
-                topic.subscribe("/ngdc/boundingBox", lang.hitch(this, "identifyBBox"));
+                topic.subscribe("/ngdc/geometry", lang.hitch(this, "identifyWithGeometry"));
+                topic.subscribe("/ngdc/mapPoint", lang.hitch(this, "identifyWithPoint"));
 
                 this._map.on("extent-change", lang.hitch(this, "updateMapExtent"));
 
@@ -59,17 +58,17 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Defe
             },
             */
 
-            identifyBBox: function(bbox) {
-                logger.debug('inside identifyBBox');
-                this.identify(bbox);
+            identifyWithGeometry: function(geometry) {
+                logger.debug('inside identifyWithGeometry');
+                this.identify(geometry);
             },
 
-            identifyPoint: function(evt) {
-                this.identify(evt.mapPoint);
+            identifyWithPoint: function(mapPoint) {
+                this.identify(mapPoint);
 
                 //TOD factor out to better support alternate Identify styles, e.g. Popup
                 //Remove any identify graphic from the map
-                var graphic = Graphic(evt.mapPoint, this.clickSymbol);
+                var graphic = Graphic(mapPoint, this.clickSymbol);
                 if (this._map.identifyGraphic) {
                     this._map.graphics.remove(this._map.identifyGraphic);
                 }
