@@ -42,6 +42,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
                 on(this.map, "key-down", lang.hitch(this, function(evt) {
                     if (evt.keyCode == 27 /*Esc key*/) {    
                         this._drawToolbar.deactivate(); //Deactivate any existing draw
+                        this._setIdentifyIcon('identifyByPointIcon'); //Switch back to the pointer icon
                     }
                 }));
 
