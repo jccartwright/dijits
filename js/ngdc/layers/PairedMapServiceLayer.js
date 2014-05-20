@@ -73,8 +73,7 @@ define([
             initialize: function () {
                 //inherit properties from the DynamicMapService
                 this.url = this._dynamicService.url;
-                this.maxRecordCount = this._dynamicService.maxRecordCount;
-                this.visibleLayers = this._dynamicService.visibleLayers;
+                this.maxRecordCount = this._dynamicService.maxRecordCount;                
                 this.layerDefinitions = this._dynamicService.layerDefinitions;
 
                 this.setOpacity(this.opacity);
@@ -92,7 +91,13 @@ define([
                             this._defaultVisibleLayers.push(layerInfo.id);
                         }
                     }, this);
+                } else {
+                    //if defaultVisibleLayers set in the constructor, set the visibleLayers on the dynamic service
+                    this._dynamicService.setVisibleLayers(this._defaultVisibleLayers);                    
                 }
+
+                //inherit visibleLayers from the dynamic service
+                this.visibleLayers = this._dynamicService.visibleLayers;
 
                 //set the initial active layer
                 this._toggleService();
