@@ -232,8 +232,8 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Defe
                 }, this);
             },
 
-            //Helper function to replace attributes containging the string "Null" with an empty string.
-            replaceNullAttributes: function(attributes) {
+            //Helper function to replace attributes containing the string "Null" with an empty string.
+            replaceNullAttributesWithEmptyString: function(attributes) {
                 for (attribute in attributes) {
                     if (attributes[attribute] === 'Null') {
                         attributes[attribute] = '';
