@@ -4,7 +4,7 @@ define(["dojo/_base/declare"],
 
         return declare([], {
             constructor: function() {
-                
+
                 //Arctic/Antarctic default zoom levels. Level 0 and 1 are disabled.
                 this.lods = [
                     //{"level": 0, "resolution": 67733.46880027094, "scale": 256000000}, 
