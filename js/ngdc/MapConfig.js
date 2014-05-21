@@ -84,6 +84,8 @@ define(["dojo/_base/declare", "esri/map", "esri/tasks/GeometryService", "esri/di
                 this.map.on('update-start', lang.hitch(this, this.showLoading));
                 this.map.on('update-end', lang.hitch(this, this.hideLoading));
 
+                topic.publish("/ngdc/mapReady");
+
                 //TODO
                 /*
                  initBanner('banner');
