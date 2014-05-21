@@ -4,6 +4,8 @@ define(["dojo/_base/declare"],
 
         return declare([], {
             constructor: function() {
+
+                //Default Web Mercator zoom levels. Levels 0 and 1 are disabled.
                 this.lods =  [
                     //{"level": 0, "resolution": 156543.03392800014,"scale": 5.91657527591555E8},
                     //{"level": 1, "resolution": 78271.51696399994, "scale": 2.95828763795777E8},
