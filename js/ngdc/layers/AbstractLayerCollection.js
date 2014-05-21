@@ -34,9 +34,16 @@ define([
             getLayerById: function(/*String*/ id) {
                 if (! this.mapServices) { return (undefined)}
 
-                var foundValues = array.filter(this.mapServices,function(item){
+                var foundValues = array.filter(this.mapServices, function(item){
                     return(item.id === id);
                 });
+                if (foundValues.length == 0) {
+                    //If not found in the main list of map services, check the paired services.
+                    foundValues = array.filter(this.pairedMapServices, function(item){
+                        return(item.id === id);
+                    });  
+                }
+
                 return foundValues[0];
             },
 
