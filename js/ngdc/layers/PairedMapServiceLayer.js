@@ -234,10 +234,6 @@ define([
             },
 
             _activateTiledService: function(){
-                if (this._isDynamic === false) {
-                    //no change necessary
-                    return;
-                }
                 logger.debug('activating tiled layer ' + this._tiledService.id + '...');
 
                 this._active = this._tiledService;
