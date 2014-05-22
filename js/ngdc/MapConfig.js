@@ -25,6 +25,18 @@ define(["dojo/_base/declare", "esri/map", "esri/tasks/GeometryService", "esri/di
                     }
                 });
 
+                //If custom lods are used, the first defined zoom level will be considered level 0. 
+                //However, we want access to the absolute level (i.e. 2 instead of 0).
+                //Augment the Map by adding a new method getAbsoluteLevel(), 
+                //which returns the current zoom level matching the well-known indices used by the map services.
+                var baseZoomLevel = 0;
+                if (options.lods) {
+                    baseZoomLevel = options.lods[0].level;
+                }
+                this.map.getAbsoluteLevel = function() {
+                    return this.getLevel() + baseZoomLevel;    
+                }
+
                 //fires after each Layer added to Map
                 this.map.on('layer-add-result', lang.hitch(this, this.layerAddResultHandler));
 
