@@ -210,7 +210,7 @@ define([
                 //logger.debug('inside _toggleService. level = ' + this._map.getLevel());
 
                 // 1) zoom level > threshold
-                if (this._map.getLevel() > this._cutoffZoom) {
+                if (this._map.getAbsoluteLevel() > this._cutoffZoom) {
                     //console.log('zoomLevel exceeded - switching to dynamic...');
                     this._activateDynamicService();
                     return;
@@ -234,10 +234,6 @@ define([
             },
 
             _activateTiledService: function(){
-                if (this._isDynamic === false) {
-                    //no change necessary
-                    return;
-                }
                 logger.debug('activating tiled layer ' + this._tiledService.id + '...');
 
                 this._active = this._tiledService;
@@ -252,11 +248,7 @@ define([
                 //this.url = this._tiledService.url;
             },
 
-            _activateDynamicService: function(){
-                if (this._isDynamic === true) {
-                    //no change necessary
-                    return;
-                }
+            _activateDynamicService: function(){                
                 logger.debug('activating dynamic layer ' + this._dynamicService.id + '...');
 
                 this._active = this._dynamicService;

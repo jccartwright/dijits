@@ -1,11 +1,40 @@
-define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Deferred", "esri/tasks/IdentifyTask",
-    "esri/tasks/IdentifyParameters", "esri/tasks/IdentifyResult", "ngdc/identify/IdentifyResultCollection",
-    "esri/symbols/SimpleMarkerSymbol", "esri/symbols/SimpleLineSymbol", "dojo/_base/Color", "esri/graphic",
-    "dojo/_base/lang", "dojo/topic", "dojo/aspect"],
-    function(declare, array, all, Deferred, IdentifyTask,
-             IdentifyParameters, IdentifyResult, IdentifyResultCollection,
-             SimpleMarkerSymbol, SimpleLineSymbol, Color, Graphic,
-             lang, topic, aspect){
+define([
+    "dojo/_base/declare", 
+    "dojo/_base/array", 
+    "dojo/promise/all", 
+    "dojo/Deferred",
+    "dojo/_base/lang", 
+    "dojo/topic", 
+    "dojo/on",
+    "dojo/aspect", 
+    "dojo/_base/Color", 
+    "esri/tasks/IdentifyTask",
+    "esri/tasks/IdentifyParameters", 
+    "esri/tasks/IdentifyResult", 
+    "esri/symbols/SimpleMarkerSymbol", 
+    "esri/symbols/SimpleLineSymbol",
+    "esri/graphic",
+    "ngdc/identify/IdentifyResultCollection"
+    ],
+    function(
+        declare, 
+        array, 
+        all,
+        Deferred, 
+        lang, 
+        topic, 
+        on,
+        aspect,
+        Color,
+        IdentifyTask,
+        IdentifyParameters, 
+        IdentifyResult, 
+        SimpleMarkerSymbol, 
+        SimpleLineSymbol, 
+        Graphic,
+        IdentifyResultCollection
+        ) {
+
         return declare([], {
             _map: null,
             taskInfos: null, //list of IdentifyTasks
@@ -173,12 +202,14 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Defe
                     //listen for changes in layer definitions in sublayers
                     aspect.after(layer, "setLayerDefinitions", lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
 
+                    //listen for changes in layer visibility. This appears to handle show(), hide(), or setVisibility() calls.
+                    aspect.after(layer, "setVisibility", lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
+
                     logger.debug('creating IdentifyTask for URL '+layer.url);
                     taskInfos.push({
                         layer: layer,
                         task: new IdentifyTask(layer.url),
-                        //enabled: layer.visible,
-                        enabled: true,
+                        enabled: layer.visible,
                         params: this.createIdentifyParams(layer)
                     });
                 }, this);
@@ -200,6 +231,16 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/promise/all", "dojo/Defe
                 identifyParams.layerIds = layer.visibleLayers
                 identifyParams.layerDefinitions = layer.layerDefinitions;
                 return(identifyParams);
+            },
+
+            updateVisibility: function(layer) {
+                logger.debug('inside updateVisibility with ' + layer.id + ' ' + layer.visible);
+
+                array.forEach(this.taskInfos, function(taskInfo){
+                    if (taskInfo.layer.id == layer.id) {
+                        taskInfo.enabled = layer.visible;
+                    }
+                });
             },
 
             updateVisibleLayers: function(layer, visibleLayers) {
