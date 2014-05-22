@@ -1,5 +1,6 @@
 define([
     "dojo/_base/declare",
+    "dojo/_base/config",
     "dojo/on",
     "dojo/dom",
     "dojo/dom-construct",
@@ -38,6 +39,7 @@ define([
 ],
     function (
         declare,
+        config,
         on,
         dom,
         domConstruct,
@@ -321,7 +323,7 @@ define([
                                 id: this.uid,
                                 //TODO: point to the magnifying glass image using a module path
                                 displayLabel: this.getItemDisplayLabel(item),
-                                label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src='js/ngdc/identify/images/magnifying-glass.png'></a>",
+                                label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
                                 layerUrl: layerUrl,
                                 layerKey: layerKey,
                                 attributes: item.feature.attributes,
