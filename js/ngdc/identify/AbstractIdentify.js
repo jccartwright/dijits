@@ -202,8 +202,8 @@ define([
                     //listen for changes in layer definitions in sublayers
                     aspect.after(layer, "setLayerDefinitions", lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
 
-                    //listen for changes in layer visibility
-                    on(layer, 'visibility-change', lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
+                    //listen for changes in layer visibility. This appears to handle show(), hide(), or setVisibility() calls.
+                    aspect.after(layer, "setVisibility", lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
 
                     logger.debug('creating IdentifyTask for URL '+layer.url);
                     taskInfos.push({
@@ -233,12 +233,12 @@ define([
                 return(identifyParams);
             },
 
-            updateVisibility: function(layer, visible) {
-                logger.debug('inside updateVisibility with ' + layer.id + ' ' + visible);
+            updateVisibility: function(layer) {
+                logger.debug('inside updateVisibility with ' + layer.id + ' ' + layer.visible);
 
                 array.forEach(this.taskInfos, function(taskInfo){
                     if (taskInfo.layer.id == layer.id) {
-                        taskInfo.enabled = visible;
+                        taskInfo.enabled = layer.visible;
                     }
                 });
             },
