@@ -1,11 +1,53 @@
-apply plugin: 'java'
+import org.apache.tools.ant.filters.*
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.eriwen:gradle-js-plugin:1.11.1'
+    }
+}
+
+apply plugin: 'java'  //needed for "jar" task
+apply plugin: 'js'
+
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+   compile 'org.mozilla:rhino:1.7R4'
+}
 
 defaultTasks 'clean', 'jar'
 
-group = 'ngdc.gis'
+ext.buildDate = new Date().format('YYYY-MM-dd')
 version = '2.0-SNAPSHOT'
+group = 'ngdc.gis'
+
+//don't know why this doesn't work
 //archivesBaseName = project.name
 archivesBaseName = 'dijits'
+
+// Declare location of javascript sources
+def jsSrcDir = "js"
+javascript.source {
+    dev {
+        js {
+            srcDir jsSrcDir
+            include "**/*.js"
+            exclude "**/*.min.js"
+        }
+    }
+    prod {
+        js {
+            srcDir jsSrcDir
+            include "**/*.min.js"
+        }
+    }
+}
 
 jar {
     from "."
@@ -13,4 +55,23 @@ jar {
     exclude 'build*'
     exclude 'test'
     exclude '.gradle'
+
+    eachFile {
+        if (it.name.endsWith('.html')) {
+            filter(ReplaceTokens, tokens: [
+                'application.version': version,
+                'application.buildDate': buildDate])
+        }
+    }
+}
+
+
+jshint {
+    tasks.jshint.source = javascript.source.dev.js.files
+    tasks.jshint.dest = file("${buildDir}/jshint-result.xml")
+    tasks.jshint.reporter = 'checkstyle'
+    jshint.options = [expr: "true", unused: "true"]
+    tasks.jshint.ignoreExitCode=true
+    //jshint.predef=["console":1]
+
 }
