@@ -11,7 +11,7 @@ buildscript {
 
 apply plugin: 'java'  //needed for "jar" task
 apply plugin: 'js'
-
+apply plugin: 'maven'
 
 repositories {
     mavenCentral()
