@@ -1,9 +1,14 @@
+import org.apache.tools.ant.filters.*
+
+//needed for "jar" task
 apply plugin: 'java'
 
 defaultTasks 'clean', 'jar'
 
-group = 'ngdc.gis'
+ext.buildDate = new Date().format('YYYY-MM-dd')
 version = '2.0-SNAPSHOT'
+group = 'ngdc.gis'
+
 //archivesBaseName = project.name
 archivesBaseName = 'dijits'
 
@@ -13,4 +18,12 @@ jar {
     exclude 'build*'
     exclude 'test'
     exclude '.gradle'
+
+    eachFile {
+        if (it.name.endsWith('.html')) {
+            filter(ReplaceTokens, tokens: [
+                'application.version': version,
+                'application.buildDate': buildDate])
+        }
+    }
 }
