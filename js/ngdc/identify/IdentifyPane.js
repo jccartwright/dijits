@@ -518,7 +518,7 @@ define([
                             newGeom = new Polyline(outSR);
                             array.forEach(geometry.paths, function(path){
                                 var newPoints = [];
-                                for (i = 0; i < path.length; i++) {
+                                for (var i = 0; i < path.length; i++) {
                                     var x = path[i][0] - worldWidth/2
                                     if (x < -worldWidth/2)
                                         x += worldWidth;
@@ -531,7 +531,7 @@ define([
                             newGeom = new Polygon(outSR);
                             array.forEach(geometry.rings, function(ring){
                                 var newPoints = [];
-                                for (i = 0; i < ring.length; i++) {
+                                for (var i = 0; i < ring.length; i++) {
                                     var x = ring[i][0] - worldWidth/2;
                                     if (x < -worldWidth/2)
                                         x += worldWidth;
