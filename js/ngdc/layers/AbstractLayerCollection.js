@@ -1,12 +1,16 @@
 define([
     "dojo/_base/declare",
     "dojo/_base/array",
+    "dojo/_base/lang",
+    "dojo/topic",
     "esri/layers/ImageParameters",
     "esri/layers/ImageServiceParameters",
     "ngdc/layers/PairedMapServiceLayer"],
     function(
         declare,
         array,
+        lang,
+        topic,
         ImageParameters,
         ImageServiceParameters,
         PairedMapServiceLayer){
@@ -21,13 +25,24 @@ define([
             layerTimeouts: null,
             name: null,
 
-            //TODO still necessary?
-            firstZoomLevel: 2,
-
             constructor: function() {
                 //TODO check to ensure unique id for mapServices
 
                 this.createImageParameters();
+
+                //Subscribe to message to set sublayer visibilities on a service
+                topic.subscribe('/ngdc/sublayer/visibility', lang.hitch(this, function (svcId, subLayers, visible) {
+                    this.setSublayerVisibility(svcId, subLayers, visible);
+                }));
+
+                //Subscribe to message to show/hide the entire service
+                topic.subscribe('/ngdc/layer/visibility', lang.hitch(this, function (svcId, visible) {
+                    if (visible) {
+                        this.getLayerById(svcId).show();
+                    } else {
+                        this.getLayerById(svcId).hide();
+                    }
+                }));                
             },
 
             //if >1 layers share an ID, return the first. return undefined if list is null or layer not found
@@ -62,6 +77,8 @@ define([
 
                 this.imageServiceParameters = new ImageServiceParameters();
                 this.imageServiceParameters.interpolation = ImageServiceParameters.INTERPOLATION_BILINEAR;
+                this.imageServiceParameters.compressionQuality = 90; 
+                //default output format is 'jpgpng'
             },
 
             buildPairedMapServices: function(map) {
@@ -128,6 +145,70 @@ define([
             clearLayerTimeout: function(mapserviceId) {
                 //logger.debug('clearing timeout for layer '+mapserviceId);
                 clearTimeout(this.layerTimeouts[mapserviceId]);
+            },
+
+            //Set the specified sublayers of svcId to be visible/invisible
+            setSublayerVisibility: function(/*String*/ svcId, /*array[int]*/ subLayers, /*boolean*/ visible) {
+                logger.debug('setSublayerVisibility ' + svcId + ' ' + subLayers + ' ' + visible);
+                var svc = this.getLayerById(svcId);
+                if (svc) {
+                    var set;
+                    if (svc.hasOwnProperty('visibleLayers')) { //Only continue if it has a visibleLayers property, i.e. ArcGISDynamicMapServiceLayer or PairedMapServiceLayer
+                        set = this.arrayToSet(svc.visibleLayers);
+                        var i;
+
+                        if (visible) {
+                            //add sublayer ids to the set
+                            for (i = 0; i < subLayers.length; i++) {
+                                set[subLayers[i]] = true;    
+                            }                            
+                        } else {
+                            //delete sublayer ids from the set
+                            for (i = 0; i < subLayers.length; i++) {
+                                delete set[subLayers[i]];
+                            }                            
+                        }
+
+                        var array = this.setToArray(set);
+                        if (array.length == 1 && array[0] == -1) {
+                            //if visible layers is [-1], hide the service
+                            svc.hide();
+                            svc.setVisibleLayers(this.setToArray(set));
+                        } else {                            
+                            svc.setVisibleLayers(this.setToArray(set));
+                            svc.show();
+                        }
+                    }
+                }    
+            },
+
+            //Converts a "set" object to an array. If the set is empty, return [-1]
+            setToArray: function(set) {
+                var array = [];
+                for (key in set) {
+                    if (set.hasOwnProperty(key)) {
+                        array.push(parseInt(key));
+                    }
+                }
+                if (array.length) {
+                    return array;
+                } else {
+                    return [-1];
+                }
+            },
+
+            //Converts an array to a "set" object.
+            //For example, the array [0, 1, 2] will be converted to:
+            //{0: true, 1: true, 2: true}
+            arrayToSet: function(array) {
+                var set = {};
+
+                for (var i = 0; i < array.length; i++) {
+                    if (array[i] >= 0) { 
+                        set[array[i]] = true;
+                    }
+                }
+                return set;
             }
         });
     }
