@@ -148,7 +148,7 @@ define([
             },
 
             //Set the specified sublayers of svcId to be visible/invisible
-            setSublayerVisibility: function(/*String*/ svcId, /*array[int]*/ subLayers, /*boolean*/ visible) {
+            setSublayerVisibility: function(/*String*/ svcId, /*int[]*/ subLayers, /*boolean*/ visible) {
                 logger.debug('setSublayerVisibility ' + svcId + ' ' + subLayers + ' ' + visible);
                 var svc = this.getLayerById(svcId);
                 if (svc) {
