@@ -1,6 +1,27 @@
-define(["dojo/_base/declare", "esri/map", "esri/tasks/GeometryService", "esri/dijit/OverviewMap",
-    "esri/geometry/webMercatorUtils", "dojo/_base/connect", "dojo/_base/array", "dojo/topic", "dojo/_base/lang", "dojo/dom"],
-    function(declare, Map, GeometryService, OverviewMap, webMercatorUtils, Connect, array, topic, lang, dom){
+define([
+    "dojo/_base/declare", 
+    "esri/map", 
+    "esri/tasks/GeometryService", 
+    "esri/dijit/OverviewMap",
+    "esri/geometry/webMercatorUtils", 
+    "dojo/_base/connect", 
+    "dojo/_base/array", 
+    "dojo/topic", 
+    "dojo/_base/lang", 
+    "dojo/dom"
+    ],
+    function(
+        declare, 
+        Map, 
+        GeometryService, 
+        OverviewMap, 
+        webMercatorUtils, 
+        Connect, 
+        array, 
+        topic, 
+        lang, 
+        dom
+        ){
         var map;
         var mapLayerCollection;
         var geometryService;
@@ -95,6 +116,10 @@ define(["dojo/_base/declare", "esri/map", "esri/tasks/GeometryService", "esri/di
 
                 this.map.on('update-start', lang.hitch(this, this.showLoading));
                 this.map.on('update-end', lang.hitch(this, this.hideLoading));
+
+                topic.subscribe('/ngdc/showLoading', lang.hitch(this, this.showLoading));
+                topic.subscribe('/ngdc/hideLoading', lang.hitch(this, this.hideLoading));
+
                 
                 //TODO
                 /*
