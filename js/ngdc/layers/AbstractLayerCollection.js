@@ -147,6 +147,18 @@ define([
                 clearTimeout(this.layerTimeouts[mapserviceId]);
             },
 
+            suspend: function() {
+                array.forEach(this.mapServices, function(svc, i){
+                    svc.suspend();
+                }, this);
+            },
+
+            resume: function() {
+                array.forEach(this.mapServices, function(svc, i){
+                    svc.resume();
+                }, this);
+            },
+
             //Set the specified sublayers of svcId to be visible/invisible
             setSublayerVisibility: function(/*String*/ svcId, /*int[]*/ subLayers, /*boolean*/ visible) {
                 logger.debug('setSublayerVisibility ' + svcId + ' ' + subLayers + ' ' + visible);
