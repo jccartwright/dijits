@@ -201,6 +201,16 @@ define([
                 return (result);
             },
 
+            suspend: function() {
+                this._tiledService.suspend();
+                this._dynamicService.suspend();
+            },
+
+            resume: function() {
+                this._tiledService.resume();
+                this._dynamicService.resume();
+            },
+
 //implement rules for switching between tiled, dynamic services.
 //dynamic service should be used in any of these cases
 // 1) zoom level > threshold
