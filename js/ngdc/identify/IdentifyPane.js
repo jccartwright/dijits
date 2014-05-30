@@ -89,6 +89,7 @@ define([
                 this.isFirstShow = true;
                 this.autoExpandTree = params.autoExpandTree && true;
                 this.enabled = true;
+                this.visible = false;
 
                 lang.mixin(this, params);
 
@@ -288,6 +289,7 @@ define([
                 this.featurePageTitle = "Identified Features (" + this.numFeatures + ")";
                 this.setTitle(this.featurePageTitle);
                 this.show(screenPt.x, screenPt.y); //Show the widget
+                this.visible = true;
                 //this.resize();
             },
 
@@ -320,7 +322,7 @@ define([
                             this.featureStore.put({
                                 uid: ++this.uid,
                                 id: this.uid,
-                                //TODO: point to the magnifying glass image using a module path
+                                //TODO: make sure magnifying glass DOM id property is unique
                                 displayLabel: this.getItemDisplayLabel(item),
                                 label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
                                 layerUrl: layerUrl,
@@ -406,7 +408,8 @@ define([
 
                 this.setTitle('Attributes: ' + item.displayLabel);
 
-                topic.publish('/identifyPane/showInfo', item);
+                var layerKey = item.layerKey;
+                this.setInfoPaneContent(this.identify.formatters[layerKey](item));
 
                 this.showInfoPage();
                 var size = {w: this.domNode.clientWidth, h: this.domNode.clientHeight}; //hack: prevent it from resetting to the initial size/position when calling resize()
@@ -657,6 +660,25 @@ define([
                 if (this.onMouseOverHandler) {
                     this.onMouseOverHandler.pause();
                 }
+                this.visible = false;
+            },
+
+            //Set the pane to be enabled and show it if it was in the background
+            enable: function() {
+                this.enabled = true;
+                if (this.visible) {
+                    this.show();
+                } else {
+                    this.hide();
+                }
+            },
+
+            //Set the pane to be disabled and hide it. If it was already visible, set visible to true so it's in the background
+            disable: function() {
+                var currentlyVisible = this.visible;
+                this.enabled = false;
+                this.hide();
+                this.visible = currentlyVisible;
             }
 
         });
