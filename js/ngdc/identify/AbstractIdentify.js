@@ -117,10 +117,10 @@ define([
                 //TODO still necessary since IdentifyResultCollection storing it?
                 this.searchGeometry = geometry;
 
-                //TODO use isResolved() or isFulFilled()?
-                if (this.promises && this.promises.isResolved() == false) {
+                //Use isFulfilled() instead of isResolved() to prevent getting into a state where it's stuck at isResolved()==false if an identify failed.
+                if (this.promises && this.promises.isFulfilled() == false) {
                     logger.debug('cancelling an active promise...');
-                    //this.cancelPromise();
+                    //this.cancelPromise();                    
                     this.promises.cancel('cancelled due to new request', true);
                 }
 
