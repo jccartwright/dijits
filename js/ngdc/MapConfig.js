@@ -119,13 +119,6 @@ define([
 
                 topic.subscribe('/ngdc/showLoading', lang.hitch(this, this.showLoading));
                 topic.subscribe('/ngdc/hideLoading', lang.hitch(this, this.hideLoading));
-
-                
-                //TODO
-                /*
-                 initBanner('banner');
-                 initTOC('toc');
-                 */
             },
 
             //Show coordinates when moving the mouse, updates limited to every 100ms.
