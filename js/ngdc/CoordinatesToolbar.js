@@ -17,12 +17,12 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
             },
 
             postCreate: function() {
-                this.scalebar = new Scalebar({map: this._map, scalebarUnit: "metric"}, this.scalebar);
+                this.scalebar = new Scalebar({map: this._map, scalebarUnit: "dual"}, this.scalebar);
                 //globals.scalebar.hide(); // scalebar is hidden by default at small scales
 
                 //TODO dispose of handle on unload
                 var handle = topic.subscribe("/ngdc/mouseposition", lang.hitch(this, function(mapPoint) {
-                    this.coordsDiv.innerHTML = mapPoint.x.toFixed(3) + ", " + mapPoint.y.toFixed(3);
+                    this.coordsDiv.innerHTML = mapPoint.x.toFixed(3) + '°, ' + mapPoint.y.toFixed(3) + '°'
                 }));
             }
         });
