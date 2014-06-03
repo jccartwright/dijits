@@ -66,7 +66,7 @@ define([
             }, //end constructor function
 
             zoomHandler: function(evt) {
-                logger.debug('zoom level: '+evt.level);
+                //logger.debug('zoom level: '+evt.level);
                 this._toggleService();
             },
 
