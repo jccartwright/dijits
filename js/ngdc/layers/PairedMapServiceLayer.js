@@ -66,7 +66,7 @@ define([
             }, //end constructor function
 
             zoomHandler: function(evt) {
-                logger.debug('zoom level: '+evt.level);
+                //logger.debug('zoom level: '+evt.level);
                 this._toggleService();
             },
 
@@ -199,6 +199,16 @@ define([
                     return (dojo.indexOf(this.visibleLayers, item) > -1);
                 }, this);
                 return (result);
+            },
+
+            suspend: function() {
+                this._tiledService.suspend();
+                this._dynamicService.suspend();
+            },
+
+            resume: function() {
+                this._tiledService.resume();
+                this._dynamicService.resume();
             },
 
 //implement rules for switching between tiled, dynamic services.
