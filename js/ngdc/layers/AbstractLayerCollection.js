@@ -37,10 +37,13 @@ define([
 
                 //Subscribe to message to show/hide the entire service
                 topic.subscribe('/ngdc/layer/visibility', lang.hitch(this, function (svcId, visible) {
-                    if (visible) {
-                        this.getLayerById(svcId).show();
-                    } else {
-                        this.getLayerById(svcId).hide();
+                    var svc = this.getLayerById(svcId);
+                    if (svc) {
+                        if (visible) {
+                            svc.show();
+                        } else {
+                            svc.hide();
+                        }
                     }
                 }));                
             },
