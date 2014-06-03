@@ -1,10 +1,12 @@
 /* positioning goes in calling page */
 .coordinatesToolbar {
-    font-size: small;
+    font-size: 11px;
+    color: #CCC;
+    font-family: "Trebuchet MS", Helvetica, Arial, "Lucida Grande", sans-serif;
     width: 190px;
-    border: solid 1px gray;
+    height: 55px;
     padding: 3px;
-    background: rgb(119, 119, 119);
-    background: rgba(119, 119, 119, 0.8);
+    background: rgb(100, 100, 100);
+    background: rgba(100, 100, 100, 0.8);
     white-space: nowrap;
 }

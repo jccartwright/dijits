@@ -52,28 +52,23 @@ define([
             init: function(params) {
                 logger.debug('inside init...');
 
-                this._mapConfig = params[0].mapConfig;
-                var layerIds = params[0].layerIds,
-                    layerCollection = params[0].mapConfig.mapLayerCollection;
+                this.layerIds = params[0].layerIds;
+                var layerCollection = params[0].layerCollection;
 
-                this._map = params[0].mapConfig.map;
+                this._map = params[0].map;
+
+                this.enabled = true;
 
                 topic.subscribe("/ngdc/geometry", lang.hitch(this, "identifyWithGeometry"));
                 topic.subscribe("/ngdc/mapPoint", lang.hitch(this, "identifyWithPoint"));
 
                 this._map.on("extent-change", lang.hitch(this, "updateMapExtent"));
 
-                this.taskInfos = this.createTaskInfos(layerIds, layerCollection);
+                this.taskInfos = this.createTaskInfos(this.layerIds, layerCollection);
 
                 // the symbol used to represent the location where the user clicked on the map
                 this.clickSymbol = params.clickSymbol ||
                     new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_X, 12, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 0, 255]), 3));
-
-//                this._map.on("click", lang.hitch(this, function(evt) {
-//                    this._map.infoWindow.setTitle("Coordinates");
-//                    this._map.infoWindow.setContent("lat/lon : " + evt.mapPoint.y + ", " + evt.mapPoint.x);
-//                    this._map.infoWindow.show(evt.screenPoint,this._map.getInfoWindowAnchor(evt.screenPoint));
-//                }));
             },
 
             /*
@@ -88,14 +83,22 @@ define([
             */
 
             identifyWithGeometry: function(geometry) {
+                if (!this.enabled) {
+                    return;
+                }
+
                 logger.debug('inside identifyWithGeometry');
                 this.identify(geometry);
             },
 
             identifyWithPoint: function(mapPoint) {
+                if (!this.enabled) {
+                    return;
+                }
+
                 this.identify(mapPoint);
 
-                //TOD factor out to better support alternate Identify styles, e.g. Popup
+                //TODO factor out to better support alternate Identify styles, e.g. Popup
                 //Remove any identify graphic from the map
                 var graphic = Graphic(mapPoint, this.clickSymbol);
                 if (this._map.identifyGraphic) {
@@ -114,10 +117,10 @@ define([
                 //TODO still necessary since IdentifyResultCollection storing it?
                 this.searchGeometry = geometry;
 
-                //TODO use isResolved() or isFulFilled()?
-                if (this.promises && this.promises.isResolved() == false) {
+                //Use isFulfilled() instead of isResolved() to prevent getting into a state where it's stuck at isResolved()==false if an identify failed.
+                if (this.promises && this.promises.isFulfilled() == false) {
                     logger.debug('cancelling an active promise...');
-                    //this.cancelPromise();
+                    //this.cancelPromise();                    
                     this.promises.cancel('cancelled due to new request', true);
                 }
 
@@ -130,7 +133,8 @@ define([
                     taskInfo.params.geometry = geometry;
 
                     if (taskInfo.enabled) {
-                        this._mapConfig.showLoading();
+                        topic.publish('/ngdc/showLoading');
+
                         this.deferreds[taskInfo.layer.id] = taskInfo.task.execute(taskInfo.params);
                     } else {
                         logger.debug('task not enabled: '+taskInfo.layer.url);
@@ -140,7 +144,7 @@ define([
                 this.promises = new all(this.deferreds, true);
 
                 this.promises.then(lang.hitch(this, function(results) {
-                    this._mapConfig.hideLoading();
+                    topic.publish('/ngdc/hideLoading');
                     //produces an map of arrays where each key/value pair represents a mapservice. The keys are the Layer
                     // names, the values are an array of IdentifyResult instances.
 
