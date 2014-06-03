@@ -139,16 +139,19 @@ define([
 
                 //Initialize the StackContainer with 2 ContentPanes: featurePage and infoPage
                 this.stackContainer = new StackContainer({
-                    style: "height: 100%; width: 100%; padding: 0px;"
+                    style: "height: 100%; width: 100%; padding: 0px;",
+                    class: "identifyPane-stackContainer"
                 }, this.containerNode);
 
                 this.featurePage = new ContentPane({
-                    style: "height: 100%; width: 100%; padding: 0px;"
+                    style: "height: 100%; width: 100%; padding: 0px;",
+                    class: "identifyPane-featurePage"
                 }).placeAt(this.containerNode);
                 this.stackContainer.addChild(this.featurePage);
 
                 this.infoPage = new ContentPane({
-                    style: "height: 100%; width: 100%"
+                    style: "height: 100%; width: 100%",
+                    class: "identifyPane-infoPage"
                 });
                 this.stackContainer.addChild(this.infoPage);
 

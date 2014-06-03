@@ -72,16 +72,16 @@
     width: 75%;
 }
 
-#stackContainer {
+.identifyPane-stackContainer {
     /*padding: 5px;*/
     overflow: hidden !important;
 }
 
-#featurePage {
+.identifyPane-featurePage {
     padding: 3px;
 }
 
-#infoPage {
+.identifyPane-infoPage {
     padding: 3px;
 }
 
