@@ -104,12 +104,14 @@ define([
                 }));
 
                 // the symbol used to display polygon features
+                // default is 30% opaque blue fill
                 this.fillSymbol = params.fillSymbol ||
                     new SimpleFillSymbol(SimpleFillSymbol.STYLE_SOLID,
                         new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
-                            new Color([64, 64, 64, 1]), 2), new Color([255, 0, 0, 0.5]));
+                            new Color([64, 64, 64, 1]), 2), new Color([0, 0, 255, 0.3]));
 
                 // the symbol used to display polyline features
+                // default is blue lines
                 this.lineSymbol = params.lineSymbol ||
                     new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 0, 255]), 2);
 
@@ -164,7 +166,7 @@ define([
 
                 this.featurePane = new ContentPane({
                     region: "center",
-                    style: "background: #EEE; border: 1px solid #BFBFBF;"
+                    style: "background: #EEE; border: 1px solid #BFBFBF; padding: 2px;"
                 });
                 bc.addChild(this.featurePane);
 
@@ -184,7 +186,7 @@ define([
                 });
                 this.infoPane = new ContentPane({
                     region: "center",
-                    style: "background: #EEE; border: 1px solid #BFBFBF;"
+                    style: "background: #EEE; border: 1px solid #BFBFBF; padding: 2px;"
                 });
                 bc2.addChild(this.infoPane);
 
