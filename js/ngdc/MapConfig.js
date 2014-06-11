@@ -69,6 +69,8 @@ define([
                 this.map.addLayers(this.mapLayerCollection.mapServices);
 
                 this.geometryService = new GeometryService("http://maps.ngdc.noaa.gov/rest/services/Geometry/GeometryServer");
+
+                this.loadingIconEnabled = true;
             },  //end constructor
 
             layerAddResultHandler: function( evt ) {
@@ -142,17 +144,43 @@ define([
             },
 
             showLoading: function() {
-                var loader = dom.byId("busy");
-                if (loader) {
-                    loader.style.display = "block";
+                if (this.loadingIconEnabled) {
+                    var loader = dom.byId("busy");
+                    if (loader) {
+                        loader.style.display = "block";
+                    }
                 }
             },
 
             hideLoading: function() {
-                var loader = dom.byId("busy");
-                if (loader) {
-                    loader.style.display = "none";
+                if (this.loadingIconEnabled) {
+                    var loader = dom.byId("busy");
+                    if (loader) {
+                        loader.style.display = "none";
+                    }
                 }
+            },
+
+            //Enable/disable the identify, identifyPane, and loading icon for this MapConfig.
+            setEnabled: function(/*boolean*/ enabled) {
+                if (this.identify) {
+                    this.identify.enabled = enabled;
+                }
+                if (!enabled) {
+                    this.hideLoading();
+                }
+                this.loadingIconEnabled = enabled;  
+
+                if (this.identifyPane) {
+                    if (enabled) {
+                        this.identifyPane.enable();
+                    } else {
+                        this.identifyPane.disable();
+                    }
+                }
+                
+                //TODO Suspend/resume the entire LayerCollection for this MapConfig?
+                // this.mapLayerCollection.resume();
             }
         });
     }
