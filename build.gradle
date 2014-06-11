@@ -72,6 +72,7 @@ jshint {
     tasks.jshint.reporter = 'checkstyle'
     jshint.options = [expr: "true", unused: "true"]
     tasks.jshint.ignoreExitCode=true
-    //jshint.predef=["console":1]
+    jshint.predef=['define':1, 'esri':1, 'logger':1, 'dojo':1]
+    //jshint.predef=['console':1]
 
 }
