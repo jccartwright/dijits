@@ -24,7 +24,7 @@ dependencies {
 defaultTasks 'clean', 'jar'
 
 ext.buildDate = new Date().format('YYYY-MM-dd')
-version = '2.0-SNAPSHOT'
+version = '2.0'
 group = 'ngdc.gis'
 
 //don't know why this doesn't work
