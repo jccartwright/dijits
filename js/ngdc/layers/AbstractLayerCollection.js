@@ -38,7 +38,7 @@ define([
                 //Subscribe to message to show/hide the entire service
                 topic.subscribe('/ngdc/layer/visibility', lang.hitch(this, function (svcId, visible) {
                     var svc = this.getLayerById(svcId);
-                    if (svc) {
+                    if (svc && svc.show) { //Check if service exists and has a show() method
                         if (visible) {
                             svc.show();
                         } else {
