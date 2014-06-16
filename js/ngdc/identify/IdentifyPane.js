@@ -300,7 +300,6 @@ define([
 
             populateFeatureStore: function(results) {
                 var numFeatures = 0;
-                this.uid = 0;
 
                 for (var svcName in results) {
                     for (var layerName in results[svcName]) {
@@ -574,7 +573,6 @@ define([
 
                 // remove previous highlight graphic
                 this.removeHighlightGraphic();
-
 
                 if (graphic) {
                     // set the symbol for the graphic
