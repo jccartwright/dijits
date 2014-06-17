@@ -1,10 +1,10 @@
 define([
-    "dojo/dom-style",
-    "dojo/_base/fx",
-    "dojo/_base/declare",
-    "dijit/registry",
-    "dojo/dom",
-    "dojo/domReady!"],
+    'dojo/dom-style',
+    'dojo/_base/fx',
+    'dojo/_base/declare',
+    'dijit/registry',
+    'dojo/dom',
+    'dojo/domReady!'],
     function(domStyle, fx, declare, registry, dom){
         return declare(null, {
             overlayNode:null,
@@ -25,6 +25,6 @@ define([
                     }
                 }).play();
             }
-        })
+        });
     }
 );

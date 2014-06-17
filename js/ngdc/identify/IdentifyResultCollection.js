@@ -1,5 +1,5 @@
-define(["dojo/_base/declare", "dojo/_base/array", "esri/tasks/IdentifyResult", "dojo/_base/lang"],
-    function(declare, array, IdentifyResult, lang){
+define(['dojo/_base/declare'],
+    function(declare){
         return declare([], {
             results: null,
             features: null,
@@ -38,7 +38,7 @@ define(["dojo/_base/declare", "dojo/_base/array", "esri/tasks/IdentifyResult", "
                 //Build an object composed of a list of IdentifyResults for each sublayer in a service.
                 //Augment each with formatter key composed of its layer and sublayer names, layerUrl, and service ID.
                 this.results = {};
-                for (svcId in results) {
+                for (var svcId in results) {
 
                     for (var i=0; i<results[svcId].length; i++) {
                         var result = results[svcId][i];

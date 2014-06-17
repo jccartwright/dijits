@@ -1,11 +1,11 @@
 define([
-    "dojo/_base/declare",
-    "dojo/_base/array",
-    "dojo/_base/lang",
-    "dojo/topic",
-    "esri/layers/ImageParameters",
-    "esri/layers/ImageServiceParameters",
-    "ngdc/layers/PairedMapServiceLayer"],
+    'dojo/_base/declare',
+    'dojo/_base/array',
+    'dojo/_base/lang',
+    'dojo/topic',
+    'esri/layers/ImageParameters',
+    'esri/layers/ImageServiceParameters',
+    'ngdc/layers/PairedMapServiceLayer'],
     function(
         declare,
         array,
@@ -15,8 +15,8 @@ define([
         ImageServiceParameters,
         PairedMapServiceLayer){
 
-        //"static" properties
-        var imageParameters;
+        //'static' properties
+        this.imageParameters = null;
 
         return declare([], {
             //instance objects set in concrete class constructor
@@ -50,12 +50,12 @@ define([
 
             //if >1 layers share an ID, return the first. return undefined if list is null or layer not found
             getLayerById: function(/*String*/ id) {
-                if (! this.mapServices) { return (undefined)}
+                if (! this.mapServices) { return (undefined);}
 
                 var foundValues = array.filter(this.mapServices, function(item){
                     return(item.id === id);
                 });
-                if (foundValues.length == 0) {
+                if (foundValues.length === 0) {
                     //If not found in the main list of map services, check the paired services.
                     foundValues = array.filter(this.pairedMapServices, function(item){
                         return(item.id === id);
@@ -68,15 +68,15 @@ define([
             getLayerIds: function() {
                 return array.map(this.mapServices, function(svc){
                     return svc.id;
-                })
+                });
             },
 
             createImageParameters: function() {
                 this.imageParameters = {};
                 this.imageParameters.png32 = new ImageParameters();
-                this.imageParameters.png32.format = "png32";
+                this.imageParameters.png32.format = 'png32';
                 this.imageParameters.jpg = new ImageParameters();
-                this.imageParameters.jpg.format = "jpg";
+                this.imageParameters.jpg.format = 'jpg';
 
                 this.imageServiceParameters = new ImageServiceParameters();
                 this.imageServiceParameters.interpolation = ImageServiceParameters.INTERPOLATION_BILINEAR;
@@ -86,7 +86,7 @@ define([
 
             buildPairedMapServices: function(map) {
                 if (! this.pairedMapServices) {
-                    logger.debug("pairedMapServices list is null for "+this.name);
+                    logger.debug('pairedMapServices list is null for '+this.name);
                     return;
                 }
                 logger.debug('building '+this.pairedMapServices.length+' PairedMapServices for '+this.name+'...');
@@ -127,7 +127,7 @@ define([
                     }
                 }, this);
                 if (idx.length != 2) {
-                    logger.warn("There should only be two elements in this array")
+                    logger.warn('There should only be two elements in this array');
                 }
                 idx.sort();
 
@@ -139,7 +139,7 @@ define([
 
             layerTimeoutHandler: function(mapservice) {
                 //logger.debug('inside layerTimeoutHandler with '+mapservice.id);
-                logger.warn("failed to load layer "+mapservice.id);
+                logger.warn('failed to load layer '+mapservice.id);
                 mapservice.suspend();
 
                 //TODO send message to server to log, email, etc.
@@ -151,13 +151,13 @@ define([
             },
 
             suspend: function() {
-                array.forEach(this.mapServices, function(svc, i){
+                array.forEach(this.mapServices, function(svc){
                     svc.suspend();
                 }, this);
             },
 
             resume: function() {
-                array.forEach(this.mapServices, function(svc, i){
+                array.forEach(this.mapServices, function(svc){
                     svc.resume();
                 }, this);
             },
@@ -197,10 +197,10 @@ define([
                 }    
             },
 
-            //Converts a "set" object to an array. If the set is empty, return [-1]
+            //Converts a 'set' object to an array. If the set is empty, return [-1]
             setToArray: function(set) {
                 var array = [];
-                for (key in set) {
+                for (var key in set) {
                     if (set.hasOwnProperty(key)) {
                         array.push(parseInt(key));
                     }
@@ -212,7 +212,7 @@ define([
                 }
             },
 
-            //Converts an array to a "set" object.
+            //Converts an array to a 'set' object.
             //For example, the array [0, 1, 2] will be converted to:
             //{0: true, 1: true, 2: true}
             arrayToSet: function(array) {

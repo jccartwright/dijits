@@ -1,20 +1,20 @@
 define([
-    "dojo/_base/declare", 
-    "dojo/_base/array", 
-    "dojo/promise/all", 
-    "dojo/Deferred",
-    "dojo/_base/lang", 
-    "dojo/topic", 
-    "dojo/on",
-    "dojo/aspect", 
-    "dojo/_base/Color", 
-    "esri/tasks/IdentifyTask",
-    "esri/tasks/IdentifyParameters", 
-    "esri/tasks/IdentifyResult", 
-    "esri/symbols/SimpleMarkerSymbol", 
-    "esri/symbols/SimpleLineSymbol",
-    "esri/graphic",
-    "ngdc/identify/IdentifyResultCollection"
+    'dojo/_base/declare', 
+    'dojo/_base/array', 
+    'dojo/promise/all', 
+    'dojo/Deferred',
+    'dojo/_base/lang', 
+    'dojo/topic', 
+    'dojo/on',
+    'dojo/aspect', 
+    'dojo/_base/Color', 
+    'esri/tasks/IdentifyTask',
+    'esri/tasks/IdentifyParameters', 
+    'esri/tasks/IdentifyResult', 
+    'esri/symbols/SimpleMarkerSymbol', 
+    'esri/symbols/SimpleLineSymbol',
+    'esri/graphic',
+    'ngdc/identify/IdentifyResultCollection'
     ],
     function(
         declare, 
@@ -45,7 +45,7 @@ define([
             searchGeometry: null,
 
             //called prior to subclass constructor
-            constructor: function(arguments) {
+            constructor: function() {
                 logger.debug('inside constructor for ngdc/AbstractIdentify');
             },
 
@@ -59,10 +59,10 @@ define([
 
                 this.enabled = true;
 
-                topic.subscribe("/ngdc/geometry", lang.hitch(this, "identifyWithGeometry"));
-                topic.subscribe("/ngdc/mapPoint", lang.hitch(this, "identifyWithPoint"));
+                topic.subscribe('/ngdc/geometry', lang.hitch(this, 'identifyWithGeometry'));
+                topic.subscribe('/ngdc/mapPoint', lang.hitch(this, 'identifyWithPoint'));
 
-                this._map.on("extent-change", lang.hitch(this, "updateMapExtent"));
+                this._map.on('extent-change', lang.hitch(this, 'updateMapExtent'));
 
                 this.taskInfos = this.createTaskInfos(this.layerIds, layerCollection);
 
@@ -118,7 +118,7 @@ define([
                 this.searchGeometry = geometry;
 
                 //Use isFulfilled() instead of isResolved() to prevent getting into a state where it's stuck at isResolved()==false if an identify failed.
-                if (this.promises && this.promises.isFulfilled() == false) {
+                if (this.promises && this.promises.isFulfilled() === false) {
                     logger.debug('cancelling an active promise...');
                     //this.cancelPromise();                    
                     this.promises.cancel('cancelled due to new request', true);
@@ -167,11 +167,11 @@ define([
 
                     //publish message w/ results
                     //TODO place into a Store instead?
-                    topic.publish("/identify/results", resultCollection);
+                    topic.publish('/identify/results', resultCollection);
                 }));
             },
 
-            sortResults: function(results) {
+            sortResults: function() {
                 //Do nothing. Override this function in subclass if sorting is desired.
                 return;
             },
@@ -184,7 +184,7 @@ define([
 
             //not currently used
             cancelPromise: function() {
-                //not sure this is necessary. Documentation says that cancelling a promise returned by "all" will
+                //not sure this is necessary. Documentation says that cancelling a promise returned by 'all' will
                 //not cancel it's constituent promises.  However, it seems to work.
 //                for(var i in this.deferreds) {
 //                    this.deferreds[i].cancel();
@@ -201,13 +201,13 @@ define([
                 array.forEach(layerIds, function(layerId) {
                     layer = layerCollection.getLayerById(layerId);
                     //listen for changes to visibility in sublayers
-                    aspect.after(layer, "setVisibleLayers", lang.hitch(this, lang.partial(this.updateVisibleLayers, layer)), true);
+                    aspect.after(layer, 'setVisibleLayers', lang.hitch(this, lang.partial(this.updateVisibleLayers, layer)), true);
 
                     //listen for changes in layer definitions in sublayers
-                    aspect.after(layer, "setLayerDefinitions", lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
+                    aspect.after(layer, 'setLayerDefinitions', lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
 
                     //listen for changes in layer visibility. This appears to handle show(), hide(), or setVisibility() calls.
-                    aspect.after(layer, "setVisibility", lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
+                    aspect.after(layer, 'setVisibility', lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
 
                     logger.debug('creating IdentifyTask for URL '+layer.url);
                     taskInfos.push({
@@ -232,7 +232,7 @@ define([
                 identifyParams.mapExtent = this._map.extent;
 
                 //initialize these based on current layer settings
-                identifyParams.layerIds = layer.visibleLayers
+                identifyParams.layerIds = layer.visibleLayers;
                 identifyParams.layerDefinitions = layer.layerDefinitions;
                 return(identifyParams);
             },
@@ -267,7 +267,7 @@ define([
                 });
             },
 
-            updateMapExtent: function(evt) {
+            updateMapExtent: function() {
                 logger.debug('inside updateMapExtent: ');
                 array.forEach(this.taskInfos, function(taskInfo){
                     taskInfo.params.width  = this._map.width;
@@ -279,7 +279,7 @@ define([
 
             //Helper function to replace attributes containing the string "Null" with an empty string.
             replaceNullAttributesWithEmptyString: function(attributes) {
-                for (attribute in attributes) {
+                for (var attribute in attributes) {
                     if (attributes[attribute] === 'Null') {
                         attributes[attribute] = '';
                     }
