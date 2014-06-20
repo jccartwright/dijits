@@ -1,8 +1,16 @@
-define(["dojo/_base/declare","ngdc/MapToolbar", "esri/geometry/webMercatorUtils"],
-    function(declare, MapToolbar, webMercatorUtils ){
+define([
+    'dojo/_base/declare',
+    'ngdc/MapToolbar', 
+    'esri/geometry/webMercatorUtils'
+    ],
+    function(
+        declare, 
+        MapToolbar, 
+        webMercatorUtils
+        ){
         return declare([MapToolbar], {
 
-            constructor: function(arguments) {
+            constructor: function() {
                 logger.debug('inside constructor for web_mercator/MapToolbar');
             },
 

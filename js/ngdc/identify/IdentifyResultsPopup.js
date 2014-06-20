@@ -1,5 +1,13 @@
-define(["dojo/_base/declare", "dojo/_base/array", "dojo/topic"],
-    function(declare, array, topic){
+define([
+    'dojo/_base/declare', 
+    'dojo/_base/array', 
+    'dojo/topic'
+    ],
+    function(
+        declare, 
+        array, 
+        topic
+        ){
 
         return declare([], {
 
@@ -9,11 +17,11 @@ define(["dojo/_base/declare", "dojo/_base/array", "dojo/topic"],
 
                 //TODO hide when Identify operation initiated
 
-                topic.subscribe("/identify/results", function(results){
+                topic.subscribe('/identify/results', function(results){
                     //console.log(identify.searchGeometry);
                     console.log('identify results: ', results.results);
                 });
             } //end constructor
         });
     }
-)
+);

@@ -1,7 +1,12 @@
-define(["dojo/_base/declare","ngdc/MapConfig"],
-    function(declare, MapConfig ){
+define([
+    'dojo/_base/declare',
+    'ngdc/MapConfig'
+    ],
+    function(
+        declare, 
+        MapConfig ){
         return declare([MapConfig], {
-            constructor: function(arguments) {
+            constructor: function() {
                 logger.debug('inside constructor for ngdc/antarctic/MapConfig');
 
                 if (Proj4js) {  

@@ -1,9 +1,7 @@
-define(["dojo/_base/declare"],
+define(['dojo/_base/declare'],
     function(declare){
         // Once all modules in the dependency list have loaded, this
         // function is called to define the module.
-
-        var logLevel;
 
         // This returned object becomes the defined value of this module
         return declare([], {

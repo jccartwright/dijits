@@ -1,5 +1,17 @@
-define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "dojo/string", "dojo/text!./templates/Banner.html"],
-    function(declare, _WidgetBase, _TemplatedMixin, string, template){
+define([
+    'dojo/_base/declare',
+    'dijit/_WidgetBase', 
+    'dijit/_TemplatedMixin', 
+    'dojo/string', 
+    'dojo/text!./templates/Banner.html'
+    ],
+    function(
+        declare, 
+        _WidgetBase, 
+        _TemplatedMixin, 
+        string, 
+        template
+        ){
         return declare([_WidgetBase, _TemplatedMixin], {
             // Our template - important!
             templateString: template,
@@ -7,7 +19,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "dojo
             breadcrumbs: null,
 
             // A class to be applied to the root node in our template
-            baseClass: "banner",
+            baseClass: 'banner',
 
             //lifecycle extension points
             postMixInProperties: function(){
@@ -27,13 +39,13 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "dojo
                     this.dataUrl = '';
                 }
 
-                if (this.image != null && this.image.slice(0, 4) === 'http') {
+                if (this.image !== null && this.image.slice(0, 4) === 'http') {
                     //absolute URL - use as is
                 } else {
                     //relative to page
                     var img = this.image;
                     if (!this.image) {
-                        img = "images/mapservice.gif";
+                        img = 'images/mapservice.gif';
                     }
 
                     //calculate absolute image location

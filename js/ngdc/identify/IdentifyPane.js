@@ -1,41 +1,41 @@
 define([
-    "dojo/_base/declare",
-    "dojo/_base/config",
-    "dojo/on",
-    "dojo/dom",
-    "dojo/dom-construct",
-    "dojo/_base/array",
-    "dojo/dom-style",
-    "dojo/_base/lang",
-    "dojo/dom-class",
-    "dojo/dnd/move",
-    "esri/domUtils",
-    "dojox/layout/FloatingPane",
-    "dojo/topic",
-    "dojo/store/Memory",
-    "dojo/store/Observable",
-    "dijit/tree/ObjectStoreModel",
-    "dijit/Tree",
-    "dijit/layout/BorderContainer",
-    "dijit/layout/StackContainer",
-    "dijit/layout/ContentPane",
-    "dijit/form/Button",
-    "dijit/registry",
-    "esri/tasks/QueryTask",
-    "esri/tasks/query",
-    "esri/symbols/SimpleFillSymbol",
-    "esri/symbols/SimpleLineSymbol",
-    "esri/symbols/SimpleMarkerSymbol",
-    "dojo/_base/Color",
-    "esri/SpatialReference",
-    "esri/geometry/Polyline",
-    "esri/geometry/Point",
-    "esri/geometry/Polygon",
-    "esri/geometry/Multipoint",
-    "esri/geometry/Extent",
-    "esri/geometry/screenUtils",
-    "esri/geometry/webMercatorUtils",
-    "dojo/window"
+    'dojo/_base/declare',
+    'dojo/_base/config',
+    'dojo/on',
+    'dojo/dom',
+    'dojo/dom-construct',
+    'dojo/_base/array',
+    'dojo/dom-style',
+    'dojo/_base/lang',
+    'dojo/dom-class',
+    'dojo/dnd/move',
+    'esri/domUtils',
+    'dojox/layout/FloatingPane',
+    'dojo/topic',
+    'dojo/store/Memory',
+    'dojo/store/Observable',
+    'dijit/tree/ObjectStoreModel',
+    'dijit/Tree',
+    'dijit/layout/BorderContainer',
+    'dijit/layout/StackContainer',
+    'dijit/layout/ContentPane',
+    'dijit/form/Button',
+    'dijit/registry',
+    'esri/tasks/QueryTask',
+    'esri/tasks/query',
+    'esri/symbols/SimpleFillSymbol',
+    'esri/symbols/SimpleLineSymbol',
+    'esri/symbols/SimpleMarkerSymbol',
+    'dojo/_base/Color',
+    'esri/SpatialReference',
+    'esri/geometry/Polyline',
+    'esri/geometry/Point',
+    'esri/geometry/Polygon',
+    'esri/geometry/Multipoint',
+    'esri/geometry/Extent',
+    'esri/geometry/screenUtils',
+    'esri/geometry/webMercatorUtils',
+    'dojo/window'
 ],
     function (
         declare,
@@ -95,7 +95,7 @@ define([
 
                 this.uid = 0;
 
-                topic.subscribe("/identify/results", lang.hitch(this, function (results) {
+                topic.subscribe('/identify/results', lang.hitch(this, function (results) {
                     //console.log('identify results: ', results);
                     if (this.enabled) {
                         this.results = results;
@@ -134,45 +134,45 @@ define([
                     this.domNode,
                     {
                         handle: this.focusNode,
-                        area: "content",
+                        area: 'content',
                         within: true
                     }
                 );
 
                 //Initialize the StackContainer with 2 ContentPanes: featurePage and infoPage
                 this.stackContainer = new StackContainer({
-                    style: "height: 100%; width: 100%; padding: 0px;",
-                    class: "identifyPane-stackContainer"
+                    style: 'height: 100%; width: 100%; padding: 0px;',
+                    class: 'identifyPane-stackContainer'
                 }, this.containerNode);
 
                 this.featurePage = new ContentPane({
-                    style: "height: 100%; width: 100%; padding: 0px;",
-                    class: "identifyPane-featurePage"
+                    style: 'height: 100%; width: 100%; padding: 0px;',
+                    class: 'identifyPane-featurePage'
                 }).placeAt(this.containerNode);
                 this.stackContainer.addChild(this.featurePage);
 
                 this.infoPage = new ContentPane({
-                    style: "height: 100%; width: 100%",
-                    class: "identifyPane-infoPage"
+                    style: 'height: 100%; width: 100%',
+                    class: 'identifyPane-infoPage'
                 });
                 this.stackContainer.addChild(this.infoPage);
 
                 //Create a BorderContainer for the featurePage.
                 //The top part (featurePane) contains the tree; the bottom part is a spacer for the resize handle
                 var bc = new BorderContainer({
-                    style: "height: 100%; width: 100%",
+                    style: 'height: 100%; width: 100%',
                     gutters: false
                 });
 
                 this.featurePane = new ContentPane({
-                    region: "center",
-                    style: "background: #EEE; border: 1px solid #BFBFBF; padding: 2px;"
+                    region: 'center',
+                    style: 'background: #EEE; border: 1px solid #BFBFBF; padding: 2px;'
                 });
                 bc.addChild(this.featurePane);
 
                 this.featurePageBottomBar = new ContentPane({
-                    region: "bottom",
-                    style: "height: 16px;"
+                    region: 'bottom',
+                    style: 'height: 16px;'
                 });
                 bc.addChild(this.featurePageBottomBar);
                 bc.placeAt(this.featurePage);
@@ -180,19 +180,19 @@ define([
 
                 //Create a BorderContainer for the infoPage.
                 var bc2 = new BorderContainer({
-                    style: "height: 100%; width: 100%",
+                    style: 'height: 100%; width: 100%',
                     gutters: false,
                     splitter: true
                 });
                 this.infoPane = new ContentPane({
-                    region: "center",
-                    style: "background: #EEE; border: 1px solid #BFBFBF; padding: 2px;"
+                    region: 'center',
+                    style: 'background: #EEE; border: 1px solid #BFBFBF; padding: 2px;'
                 });
                 bc2.addChild(this.infoPane);
 
                 this.infoPageBottomBar = new ContentPane({
-                    region: "bottom",
-                    style: "padding: 2px"
+                    region: 'bottom',
+                    style: 'padding: 2px'
                 });
                 bc2.addChild(this.infoPageBottomBar);
                 bc2.placeAt(this.infoPage);
@@ -200,8 +200,8 @@ define([
                 //Initialize the infoPage with a back button
                 //TODO: finish implementing this
                 this.backButton = new Button({
-                    label: "Back",
-                    style: "bottom: 5px; left: 5px;",
+                    label: 'Back',
+                    style: 'bottom: 5px; left: 5px;',
                     onClick: lang.hitch(this, function(){
                         this.setTitle(this.featurePageTitle);
                         this.stackContainer.back();
@@ -234,17 +234,17 @@ define([
                 //Custom TreeNode class (based on dijit.TreeNode) that allows rich text labels.
                 //Example here: http://dojotoolkit.org/reference-guide/1.9/dijit/Tree-examples.html
                 this.CustomTreeNode = declare(Tree._TreeNode, {
-                    _setLabelAttr: {node: "labelNode", type: "innerHTML"}
+                    _setLabelAttr: {node: 'labelNode', type: 'innerHTML'}
                 });
             },
 
-            resize: function(newSize) {
+            resize: function() {
                 var top = this.domNode.style.top;
                 var left = this.domNode.style.left;
 
                 this.inherited(arguments);
-                domStyle.set(this.domNode, "top", top);
-                domStyle.set(this.domNode, "left", left);
+                domStyle.set(this.domNode, 'top', top);
+                domStyle.set(this.domNode, 'left', left);
 
                 //Ensure the contents get properly resized when the entire widget resizes, doesn't seem to happen otherwise
                 this.stackContainer.resize();
@@ -263,7 +263,7 @@ define([
             },
 
             showResults: function(resultCollection) {
-                //console.log("inside showResults...");
+                //console.log('inside showResults...');
                 var screenPt;
                 if (this.map.spatialReference.isWebMercator() && resultCollection.anchorPoint.spatialReference.wkid == 4326) {
                     screenPt = screenUtils.toScreenGeometry(this.map.extent, this.map.width, this.map.height,
@@ -291,7 +291,7 @@ define([
                 //Construct a new tree and place it in the feature pane.
                 this.constructFeatureTree();
 
-                this.featurePageTitle = "Identified Features (" + this.numFeatures + ")";
+                this.featurePageTitle = 'Identified Features (' + this.numFeatures + ')';
                 this.setTitle(this.featurePageTitle);
                 this.show(screenPt.x, screenPt.y); //Show the widget
                 this.visible = true;
@@ -300,7 +300,6 @@ define([
 
             populateFeatureStore: function(results) {
                 var numFeatures = 0;
-                this.uid = 0;
 
                 for (var svcName in results) {
                     for (var layerName in results[svcName]) {
@@ -313,7 +312,7 @@ define([
                             var layerUrl = results[svcName][layerName][i].layerUrl;
 
                             //Create a layer "folder" node if it doesn't already exist
-                            if (this.featureStore.query({name: layerName}).length == 0) {
+                            if (this.featureStore.query({name: layerName}).length === 0) {
                                 this.featureStore.put({
                                     uid: ++this.uid,
                                     id: layerName,
@@ -355,13 +354,13 @@ define([
                     }),
                     getIconClass: function(item, opened) {
                         if (item.type == 'item') {
-                            return "iconBlank";
+                            return 'iconBlank';
                         }
                         else if (item.type == 'folder') {
-                            return (opened ? "dijitFolderOpened" : "dijitFolderClosed");
+                            return (opened ? 'dijitFolderOpened' : 'dijitFolderClosed');
                         }
                         else {
-                            return "dijitLeaf";
+                            return 'dijitLeaf';
                         }
                     },
                     _createTreeNode: lang.hitch(this, function(args){
@@ -371,7 +370,7 @@ define([
 
                 //Attach the onMouseOver handler for highlighting features.
                 //It's pausable so we can pause it when hiding the dijit to avoid extraneous mouseovers firing
-                this.onMouseOverHandler = on.pausable(this.tree, "mouseOver", lang.hitch(this, function(item) {
+                this.onMouseOverHandler = on.pausable(this.tree, 'mouseOver', lang.hitch(this, function(item) {
                     this.onMouseOverNode(item);
                 }));
                 this.tree.placeAt(this.featurePane);
@@ -460,7 +459,7 @@ define([
 
                 var queryTask = new QueryTask(item.layerUrl);
                 var query = new Query();
-                query.where = "OBJECTID = " + item.attributes['OBJECTID'];
+                query.where = 'OBJECTID = ' + item.attributes['OBJECTID'];
                 query.outSpatialReference = this.map.spatialReference;
                 query.returnGeometry = true;
                 query.maxAllowableOffset = 100; //simpify a bit for performance
@@ -484,16 +483,16 @@ define([
 
             showZoomToIcon: function(id) {
                 if (this.currentZoomToIcon && dom.byId(this.currentZoomToIcon.id)) {
-                    domStyle.set(this.currentZoomToIcon.id, "display", "none");
+                    domStyle.set(this.currentZoomToIcon.id, 'display', 'none');
                 }
                 this.currentZoomToIcon = dom.byId('zoom-' + id);
-                domStyle.set('zoom-' + id, "display", "inline");
+                domStyle.set('zoom-' + id, 'display', 'inline');
 
                 //Remove any existing zoom-to handler
                 if (this.zoomToHandler) {
                     this.zoomToHandler.remove();
                 }
-                this.zoomToHandler = on(this.currentZoomToIcon, "click", lang.hitch(this, function(evt){
+                this.zoomToHandler = on(this.currentZoomToIcon, 'click', lang.hitch(this, function(evt){
                     console.log('Zoom-to clicked for uid=' + id);
                     evt.stopPropagation(); //Stop the onClick event from bubbling up to the enclosing TreeNode
                     this.zoomToFeature(this.highlightGraphic);
@@ -501,12 +500,12 @@ define([
             },
 
             zoomToFeature: function(graphic) {
-                console.log("inside zoomToFeature...");
+                console.log('inside zoomToFeature...');
 
                 var geometry = graphic.geometry;
                 var worldWidth = 40075014.13432359; //Width of the map in Web Mercator
 
-                if (geometry.type === "point") {
+                if (geometry.type === 'point') {
                     this.map.centerAndZoom(geometry, this.map.getLevel() + 3); //Center on the point and zoom in 3 more levels
                 }
                 else {
@@ -517,7 +516,7 @@ define([
                         //So, it's likely the feature crosses the antimeridian.
 
                         //180-degree centered Web Mercator WKT
-                        var outSR = new SpatialReference({wkt: "PROJCS[\"WGS_1984_Web_Mercator_Auxiliary_Sphere\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Mercator_Auxiliary_Sphere\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",180],PARAMETER[\"Standard_Parallel_1\",0.0],PARAMETER[\"Auxiliary_Sphere_Type\",0.0],UNIT[\"Meter\",1.0]]"});
+                        var outSR = new SpatialReference({wkt: 'PROJCS[\"WGS_1984_Web_Mercator_Auxiliary_Sphere\",GEOGCS[\"GCS_WGS_1984\",DATUM[\"D_WGS_1984\",SPHEROID[\"WGS_1984\",6378137.0,298.257223563]],PRIMEM[\"Greenwich\",0.0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Mercator_Auxiliary_Sphere\"],PARAMETER[\"False_Easting\",0.0],PARAMETER[\"False_Northing\",0.0],PARAMETER[\"Central_Meridian\",180],PARAMETER[\"Standard_Parallel_1\",0.0],PARAMETER[\"Auxiliary_Sphere_Type\",0.0],UNIT[\"Meter\",1.0]]'});
 
                         //Convert the geometry to 180-centered Web Mercator by adding/subtracting worldWidth from all x coords in the Western Hemisphere
                         var newGeom;
@@ -526,7 +525,7 @@ define([
                             array.forEach(geometry.paths, function(path){
                                 var newPoints = [];
                                 for (var i = 0; i < path.length; i++) {
-                                    var x = path[i][0] - worldWidth/2
+                                    var x = path[i][0] - worldWidth/2;
                                     if (x < -worldWidth/2)
                                         x += worldWidth;
                                     newPoints[i] = new Point(x, path[i][1], outSR);
@@ -560,7 +559,7 @@ define([
 
                         //Shift the extent by a constant to convert back to Web Mercator
                         //May result in a geometry extending past the western edge of the map. This is what we want.
-                        featureExtent = new Extent(newExtent.xmin - worldWidth/2, newExtent.ymin, newExtent.xmax - worldWidth/2, newExtent.ymax, new esri.SpatialReference({
+                        featureExtent = new Extent(newExtent.xmin - worldWidth/2, newExtent.ymin, newExtent.xmax - worldWidth/2, newExtent.ymax, new SpatialReference({
                             wkid: 3857
                         }));
                     }
@@ -575,20 +574,19 @@ define([
                 // remove previous highlight graphic
                 this.removeHighlightGraphic();
 
-
                 if (graphic) {
                     // set the symbol for the graphic
                     switch (graphic.geometry.type) {
-                        case "point":
+                        case 'point':
                             graphic.setSymbol(this.markerSymbol);
                             break;
-                        case "multipoint":
+                        case 'multipoint':
                             graphic.setSymbol(this.markerSymbol);
                             break;
-                        case "polyline":
+                        case 'polyline':
                             graphic.setSymbol(this.lineSymbol);
                             break;
-                        case "polygon":
+                        case 'polygon':
                             graphic.setSymbol(this.fillSymbol);
                             break;
                     }

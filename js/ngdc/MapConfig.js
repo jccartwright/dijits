@@ -1,14 +1,14 @@
 define([
-    "dojo/_base/declare", 
-    "esri/map", 
-    "esri/tasks/GeometryService", 
-    "esri/dijit/OverviewMap",
-    "esri/geometry/webMercatorUtils", 
-    "dojo/_base/connect", 
-    "dojo/_base/array", 
-    "dojo/topic", 
-    "dojo/_base/lang", 
-    "dojo/dom"
+    'dojo/_base/declare', 
+    'esri/map', 
+    'esri/tasks/GeometryService', 
+    'esri/dijit/OverviewMap',
+    'esri/geometry/webMercatorUtils', 
+    'dojo/_base/connect', 
+    'dojo/_base/array', 
+    'dojo/topic', 
+    'dojo/_base/lang', 
+    'dojo/dom'
     ],
     function(
         declare, 
@@ -22,9 +22,6 @@ define([
         lang, 
         dom
         ){
-        var map;
-        var mapLayerCollection;
-        var geometryService;
 
         return declare([], {
             constructor: function(divId, options, mapLayerCollection) {
@@ -36,7 +33,7 @@ define([
                     if (options.overview) {
                         var overviewMap = new OverviewMap({
                             map: evt.map,
-                            attachTo: "bottom-right",
+                            attachTo: 'bottom-right',
                             width: 150,
                             height: 120,
                             visible: true,
@@ -56,7 +53,7 @@ define([
                 }
                 this.map.getAbsoluteLevel = function() {
                     return this.getLevel() + baseZoomLevel;    
-                }
+                };
 
                 //fires after each Layer added to Map
                 this.map.on('layer-add-result', lang.hitch(this, this.layerAddResultHandler));
@@ -68,7 +65,7 @@ define([
                 //add all layers to Map
                 this.map.addLayers(this.mapLayerCollection.mapServices);
 
-                this.geometryService = new GeometryService("http://maps.ngdc.noaa.gov/rest/services/Geometry/GeometryServer");
+                this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/rest/services/Geometry/GeometryServer');
 
                 this.loadingIconEnabled = true;
             },  //end constructor
@@ -98,7 +95,7 @@ define([
                     logger.debug('all layers added to map.');
                 } else {
                     logger.warn('one or more layers failed to load');
-                };
+                }
 
                 //should always be true
                 if (layers.length !== this.mapLayerCollection.mapServices.length) {
@@ -128,7 +125,7 @@ define([
             showCoordinates: function(evt) {
                 if (! this.waitToUpdate) {
                     this.waitToUpdate = true;
-                    topic.publish("/ngdc/mouseposition", this.mapPointToGeographic(evt.mapPoint));
+                    topic.publish('/ngdc/mouseposition', this.mapPointToGeographic(evt.mapPoint));
 
                     //Wait 100ms before allowing another update
                     setTimeout(lang.hitch(this, function(){
@@ -145,18 +142,18 @@ define([
 
             showLoading: function() {
                 if (this.loadingIconEnabled) {
-                    var loader = dom.byId("busy");
+                    var loader = dom.byId('busy');
                     if (loader) {
-                        loader.style.display = "block";
+                        loader.style.display = 'block';
                     }
                 }
             },
 
             hideLoading: function() {
                 if (this.loadingIconEnabled) {
-                    var loader = dom.byId("busy");
+                    var loader = dom.byId('busy');
                     if (loader) {
-                        loader.style.display = "none";
+                        loader.style.display = 'none';
                     }
                 }
             },

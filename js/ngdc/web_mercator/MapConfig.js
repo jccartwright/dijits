@@ -1,8 +1,16 @@
-define(["dojo/_base/declare","ngdc/MapConfig", "esri/geometry/webMercatorUtils"],
-    function(declare, MapConfig, webMercatorUtils ){
+define([
+    'dojo/_base/declare',
+    'ngdc/MapConfig', 
+    'esri/geometry/webMercatorUtils'
+    ],
+    function(
+        declare, 
+        MapConfig, 
+        webMercatorUtils
+        ){
         return declare([MapConfig], {
 
-            constructor: function(arguments) {
+            constructor: function() {
                 logger.debug('inside constructor for ngdc/web_mercator/MapConfig');
             },
 

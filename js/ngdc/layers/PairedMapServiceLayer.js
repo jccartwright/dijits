@@ -1,9 +1,9 @@
 define([
-    "dojo/_base/declare",
-    "dojo/_base/array",
-    "esri/layers/layer",
-    "dojo/on",
-    "dojo/_base/lang"],
+    'dojo/_base/declare',
+    'dojo/_base/array',
+    'esri/layers/layer',
+    'dojo/on',
+    'dojo/_base/lang'],
     function(
         declare,
         array,
@@ -31,7 +31,7 @@ define([
 
             constructor: function(params, map) {
                 if (!map || !params.id || !params.dynamicService || !params.tiledService) {
-                    logger.error("PairedMapServiceLayer is missing required parameters in constructor");
+                    logger.error('PairedMapServiceLayer is missing required parameters in constructor');
                     return;
                 }
 
@@ -53,19 +53,19 @@ define([
                 this._defaultVisibleLayers = params.defaultVisibleLayers || [];
 
                 //TODO any difference between these?
-                on(map, "zoom-end", lang.hitch(this, this.zoomHandler));
-//                map.on("zoom-end", lang.hitch(this, this.zoomHandler));
+                on(map, 'zoom-end', lang.hitch(this, this.zoomHandler));
+//                map.on('zoom-end', lang.hitch(this, this.zoomHandler));
 
                 //verify layers loaded
                 if (!this._dynamicService.loaded || !this._tiledService.loaded) {
-                    logger.warn("component layers in PairedMapServiceLayer not loaded");
+                    logger.warn('component layers in PairedMapServiceLayer not loaded');
                     return;
                 }
 
                 this.initialize();
             }, //end constructor function
 
-            zoomHandler: function(evt) {
+            zoomHandler: function() {
                 //logger.debug('zoom level: '+evt.level);
                 this._toggleService();
             },
@@ -107,7 +107,7 @@ define([
                 logger.debug('setting visibleLayers to ', ids);
 
                 if (ids === null) {
-                    logger.error("visibleLayers cannot be null");
+                    logger.error('visibleLayers cannot be null');
                     return;
                 }
                 //Empty array means default layer visibility defined in the mapservice
@@ -162,7 +162,7 @@ define([
 
 //defined in layers.Layer
             setVisibility: function(isVisible){
-                //console.log("setting visibility to ",isVisible);
+                //console.log('setting visibility to ',isVisible);
                 this.visible = isVisible;
                 if (isVisible) {
                     this._toggleService();
@@ -174,7 +174,7 @@ define([
 
 //defined in layers.Layer
             setOpacity: function(value){
-                //console.log("setting opacity to ",value);
+                //console.log('setting opacity to ',value);
                 this._tiledService.setOpacity(value);
                 this._dynamicService.setOpacity(value);
                 this.opacity = value;
