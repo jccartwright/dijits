@@ -682,6 +682,11 @@ define([
                 this.enabled = false;
                 this.hide();
                 this.visible = currentlyVisible;
+            },
+
+            setTitle: function() {
+                this.inherited(arguments);
+                this.resize(); //Force the FloatingPane to re-layout its child widgets in case the title spans multiple lines
             }
 
         });
