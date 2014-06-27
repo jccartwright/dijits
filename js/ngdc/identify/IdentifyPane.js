@@ -198,13 +198,23 @@ define([
                 bc2.placeAt(this.infoPage);
 
                 //Initialize the infoPage with a back button
-                //TODO: finish implementing this
                 this.backButton = new Button({
                     label: 'Back',
                     style: 'bottom: 5px; left: 5px;',
                     onClick: lang.hitch(this, function(){
                         this.setTitle(this.featurePageTitle);
                         this.stackContainer.back();
+                    })
+                }).placeAt(this.infoPageBottomBar);
+
+                //Add a 'Zoom to' button
+                this.zoomToButton = new Button({
+                    label: 'Zoom to',
+                    style: 'bottom: 5px',
+                    onClick: lang.hitch(this, function(){
+                        if (this.highlightGraphic) {
+                            this.zoomToFeature(this.highlightGraphic);
+                        }
                     })
                 }).placeAt(this.infoPageBottomBar);
 
