@@ -39,6 +39,18 @@
     width: 0px;
 }
 
+.identifyPane .dijitTreeNode {
+    cursor: pointer;
+}
+
+.identifyPane .dijitTreeIcon {
+    cursor: pointer;
+}
+
+.identifyPane .dijitTreeLabel {
+    cursor: pointer;
+}
+
 .zoomto-link {
     color: transparent; /*prevent colored outline on the magnifying glass icon*/
     display: none;
