@@ -198,13 +198,23 @@ define([
                 bc2.placeAt(this.infoPage);
 
                 //Initialize the infoPage with a back button
-                //TODO: finish implementing this
                 this.backButton = new Button({
                     label: 'Back',
                     style: 'bottom: 5px; left: 5px;',
                     onClick: lang.hitch(this, function(){
                         this.setTitle(this.featurePageTitle);
                         this.stackContainer.back();
+                    })
+                }).placeAt(this.infoPageBottomBar);
+
+                //Add a 'Zoom to' button
+                this.zoomToButton = new Button({
+                    label: 'Zoom to',
+                    style: 'bottom: 5px',
+                    onClick: lang.hitch(this, function(){
+                        if (this.highlightGraphic) {
+                            this.zoomToFeature(this.highlightGraphic);
+                        }
                     })
                 }).placeAt(this.infoPageBottomBar);
 
@@ -295,7 +305,6 @@ define([
                 this.setTitle(this.featurePageTitle);
                 this.show(screenPt.x, screenPt.y); //Show the widget
                 this.visible = true;
-                //this.resize();
             },
 
             populateFeatureStore: function(results) {
@@ -493,14 +502,14 @@ define([
                     this.zoomToHandler.remove();
                 }
                 this.zoomToHandler = on(this.currentZoomToIcon, 'click', lang.hitch(this, function(evt){
-                    console.log('Zoom-to clicked for uid=' + id);
+                    //console.log('Zoom-to clicked for uid=' + id);
                     evt.stopPropagation(); //Stop the onClick event from bubbling up to the enclosing TreeNode
                     this.zoomToFeature(this.highlightGraphic);
                 }));
             },
 
             zoomToFeature: function(graphic) {
-                console.log('inside zoomToFeature...');
+                //console.log('inside zoomToFeature...');
 
                 var geometry = graphic.geometry;
                 var worldWidth = 40075014.13432359; //Width of the map in Web Mercator
@@ -682,6 +691,19 @@ define([
                 this.enabled = false;
                 this.hide();
                 this.visible = currentlyVisible;
+            },
+
+            setTitle: function() {
+                this.inherited(arguments);
+                this.forceLayout();
+            },
+
+            //Force the FloatingPane to re-layout its child widgets
+            forceLayout: function() {
+                if (this.visible) {
+                    var size = {w: this.domNode.clientWidth, h: this.domNode.clientHeight}; //hack: prevent it from resetting to the initial size/position when calling resize()
+                    this.resize(size); //manually call resize() so the contents layout properly, even if line wrapping occurs.
+                }
             }
 
         });
