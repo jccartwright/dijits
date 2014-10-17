@@ -160,7 +160,7 @@ define([
                 //Create a BorderContainer for the featurePage.
                 //The top part (featurePane) contains the tree; the bottom part is a spacer for the resize handle
                 var bc = new BorderContainer({
-                    style: 'height: 100%; width: 100%',
+                    style: 'height: 100%; width: 100%; padding: 0px;',
                     gutters: false
                 });
 
@@ -172,7 +172,7 @@ define([
 
                 this.featurePageBottomBar = new ContentPane({
                     region: 'bottom',
-                    style: 'height: 16px;'
+                    style: 'height: 16px; border: 0px !important; padding: 2px !important;'
                 });
                 bc.addChild(this.featurePageBottomBar);
                 bc.placeAt(this.featurePage);
@@ -180,7 +180,7 @@ define([
 
                 //Create a BorderContainer for the infoPage.
                 var bc2 = new BorderContainer({
-                    style: 'height: 100%; width: 100%',
+                    style: 'height: 100%; width: 100%; padding: 0px;',
                     gutters: false,
                     splitter: true
                 });
@@ -192,7 +192,7 @@ define([
 
                 this.infoPageBottomBar = new ContentPane({
                     region: 'bottom',
-                    style: 'padding: 2px'
+                    style: 'border: 0px !important; padding: 2px !important;'
                 });
                 bc2.addChild(this.infoPageBottomBar);
                 bc2.placeAt(this.infoPage);
@@ -439,7 +439,17 @@ define([
                 //The event references the TreeRow. Get the enclosing TreeNode widget.
                 var item = registry.getEnclosingWidget(evt.target).item;
 
+                //Remove any existing blue underlined label
+                if (this.currentItemLabel && dom.byId(this.currentItemLabel.id)) {
+                    domStyle.set(this.currentItemLabel.id, 'color', '');
+                    domStyle.set(this.currentItemLabel.id, 'text-decoration', '');
+                }
+
                 if (item && item.type == 'item') {
+
+                    //Style the label in blue with underline
+                    this.styleItemAsLink(item.uid);
+
                     if (this.highlightItem && item.uid == this.highlightItem.uid) {
                         //skip if current item already highlighted
                         return;
@@ -453,6 +463,15 @@ define([
 
                     //TODO: cache feature geometries in a store to speed up subsequent mouseovers?
                     //Cache the first X features on load?
+                }
+            },
+
+            //Style the current item label in blue with underline. Requires that the node has an id of 'itemLabel-xxx'
+            styleItemAsLink: function(id) {
+                this.currentItemLabel = dom.byId('itemLabel-' + id);
+                if (this.currentItemLabel) {
+                    domStyle.set('itemLabel-' + id, 'color', 'blue');
+                    domStyle.set('itemLabel-' + id, 'text-decoration', 'underline');
                 }
             },
 
@@ -471,7 +490,7 @@ define([
                 query.where = 'OBJECTID = ' + item.attributes['OBJECTID'];
                 query.outSpatialReference = this.map.spatialReference;
                 query.returnGeometry = true;
-                query.maxAllowableOffset = 100; //simpify a bit for performance
+                query.maxAllowableOffset = 100; //simpify a bit for performance. TODO: set based on current map scale?
                 query.outFields = [];
                 var uid = item.uid;
 
