@@ -45,7 +45,12 @@ define([
                             svc.hide();
                         }
                     }
-                }));                
+                }));
+
+                //Subscribe to message to call setVisibleLayers on a service
+                topic.subscribe('/ngdc/setVisibleLayers', lang.hitch(this, function (svcId, visibleLayers) {
+                    this.setVisibleLayers(svcId, visibleLayers);
+                }));             
             },
 
             //if >1 layers share an ID, return the first. return undefined if list is null or layer not found
@@ -195,6 +200,16 @@ define([
                         }
                     }
                 }    
+            },
+
+            setVisibleLayers: function(/*String*/ svcId, /*int[]*/ visibleLayers) {
+                logger.debug('setVisibleLayers ' + svcId + ' ' + visibleLayers);
+                var svc = this.getLayerById(svcId);
+                if (svc) {
+                    if (svc.hasOwnProperty('visibleLayers')) { //Only continue if it has a visibleLayers property, i.e. ArcGISDynamicMapServiceLayer or PairedMapServiceLayer
+                        svc.setVisibleLayers(visibleLayers);
+                    }
+                }
             },
 
             //Converts a 'set' object to an array. If the set is empty, return [-1]

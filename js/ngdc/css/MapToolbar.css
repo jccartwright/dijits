@@ -29,8 +29,12 @@
     height: 16px;
 }
 
-#identifyLabelDiv {
-    display: inline-flex;
+.identifyLabel {
+    border-collapse: collapse;
+}
+
+.identifyLabel td {
+    padding: 0px;
 }
 
 

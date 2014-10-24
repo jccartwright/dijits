@@ -96,8 +96,8 @@ define([
                 }));
 
                 topic.subscribe('/ngdc/BoundingBoxDialog/extent', lang.hitch(this, function(extent) {
-                    //BoundingBoxDialog passed an extent. Add to map and identify.
-                    this._addAreaOfInterestToMap(extent);
+                    //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
+                    this._addAreaOfInterestToMap(extent, true);
                 }));
             },
 
@@ -288,8 +288,8 @@ define([
                 this.bboxDialog.show();
             },            
 
-            //attached to onDrawEnd event
-            _addAreaOfInterestToMap: function(/*Geometry*/ geometry) {
+            //attached to onDrawEnd event when drawing geometry. Also called after defining extent with the BoundingBoxDialog.
+            _addAreaOfInterestToMap: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
                 this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
                 this.map.graphics.add(this.map.identifyGraphic);
 
@@ -298,6 +298,10 @@ define([
                 this.map.showZoomSlider();
 
                 topic.publish('/ngdc/geometry', this.geometryToGeographic(geometry));
+
+                if (zoomToExtent) {
+                    this.map.setExtent(geometry, true);
+                }
 
                 this.clickHandler.resume(); //Resume map click events if they were paused
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
