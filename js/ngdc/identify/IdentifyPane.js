@@ -441,8 +441,10 @@ define([
 
                 //Remove any existing blue underlined label
                 if (this.currentItemLabel && dom.byId(this.currentItemLabel.id)) {
-                    domStyle.set(this.currentItemLabel.id, 'color', '');
-                    domStyle.set(this.currentItemLabel.id, 'text-decoration', '');
+                    domStyle.set(this.currentItemLabel.id, {
+                        color: '',
+                        textDecoration: ''
+                    });
                 }
 
                 if (item && item.type == 'item') {
@@ -470,8 +472,10 @@ define([
             styleItemAsLink: function(id) {
                 this.currentItemLabel = dom.byId('itemLabel-' + id);
                 if (this.currentItemLabel) {
-                    domStyle.set('itemLabel-' + id, 'color', 'blue');
-                    domStyle.set('itemLabel-' + id, 'text-decoration', 'underline');
+                    domStyle.set('itemLabel-' + id, {
+                        color: 'blue',
+                        textDecoration: 'underline'
+                    });
                 }
             },
 
