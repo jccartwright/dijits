@@ -66,6 +66,51 @@ define([
             baseClass: 'mapToolbar',
             layerCollection: null,
 
+            /*            
+            In the constructor of subclasses, this._basemaps, this._overlays, and this._identifyTools should be set similar to these:
+                this._basemaps = [
+                    {base: 'Ocean Base', overlays: [{id: 'Ocean Reference'}], label: 'Ocean Basemap (Esri)'},
+                    {base: 'GEBCO_08', overlays: [{id: 'World Boundaries and Places'}], label: 'Shaded Relief (GEBCO_08)'},
+                    {base: 'ETOPO1', overlays: [{id: 'World Boundaries and Places'}], label: 'Shaded Relief (ETOPO1)'},
+                    {base: 'Light Gray', overlays: [{id: 'Light Gray Reference'}], label: 'Light Gray (Esri)'},
+                    {base: 'World Imagery', overlays: [{id: 'World Boundaries and Places'}], label: 'World Imagery (Esri)'},
+                    {base: 'NatGeo', label: 'National Geographic (Esri)'} //NatGeo has no boundaries overlay
+                ];
+                this._overlays = [
+                    {
+                        label: 'Boundaries/Labels',
+                        services: [{id: 'Ocean Reference'}],
+                        visible: true
+                    }, 
+                    {
+                        label: 'Bathymetry Contours (from GEBCO_08)',
+                        services: [{id: 'GEBCO_08 Contours'}],
+                        visible: false
+                    },
+                    {
+                        label: 'Graticule',
+                        services: [{id: 'Graticule'}],
+                        visible: false
+                    },
+                    {
+                        label: 'EEZs (NOAA OCS and VLIZ)',
+                        services: [{id: 'ECS Catalog', sublayers: [21, 22]}],
+                        visible: true
+                    },
+                    {
+                        label: 'International ECS Areas',
+                        services: [{id: 'ECS Catalog', sublayers: [40]}],
+                        visible: false
+                    }
+                ];
+                this._identifyTools = [
+                    {label: 'Point (Single-Click)', id: 'point', iconClass: 'identifyByPointIcon'},
+                    {label: 'Draw Rectangle', id: 'rect', iconClass: 'identifyByRectIcon'},
+                    {label: 'Draw Polygon', id: 'polygon', iconClass: 'identifyByPolygonIcon'},
+                    {label: 'Define Bounding Box', id: 'coords', iconClass: 'identifyByCoordsIcon'}
+                ];
+            */
+
             //constructor for parent called before constructor of child class
             constructor: function(/*Object*/ kwArgs) {
                 this.layerCollection = kwArgs.layerCollection;
@@ -104,26 +149,26 @@ define([
             showBasemap: function(selectedIndex) {
 
                 //only one basemap showing at a time
-                array.forEach(this._basemaps, function(basemap, idx) {
-                    if (selectedIndex == idx) {        
-                        //Show the basemap base                
-                        this.layerCollection.getLayerById(basemap.base).setVisibility(true);
-                                                
-                        //Set the Boundaries/Labels checkbox to use the currently-selected overlay(s)
-                        this._overlays[this.defaultBoundariesIndex].services = basemap.overlays;
+                array.forEach(this._basemaps, lang.hitch(this, function(basemap, idx) {                                       
+                    //Hide the base and overlays
+                    topic.publish('/ngdc/layer/visibility', basemap.base, false);
 
-                        this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = 'bold';
-                    } 
-                    else {
-                        //Hide the base and overlays
-                        this.layerCollection.getLayerById(basemap.base).setVisibility(false);
-                        array.forEach(basemap.overlays, lang.hitch(this, function(overlay) {
-                            this.layerCollection.getLayerById(overlay).setVisibility(false);
-                        }));
+                    array.forEach(basemap.overlays, lang.hitch(this, function(overlay) {
+                        this.setOverlayVisibility(this.defaultBoundariesIndex, false);
+                    }));
 
-                        this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = 'normal';
-                    }
-                }, this);
+                    this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = 'normal';
+                }));
+
+                var basemap = this._basemaps[selectedIndex];
+
+                //Show the basemap base                                
+                topic.publish('/ngdc/layer/visibility', basemap.base, true);
+
+                //Set the Boundaries/Labels checkbox to use the currently-selected overlay(s)
+                this._overlays[this.defaultBoundariesIndex].services = basemap.overlays;
+
+                this.basemapMenu.getChildren()[selectedIndex].containerNode.style.fontWeight = 'bold';
 
                 var menuItem = this.overlayMenu.getChildren()[this.defaultBoundariesIndex];
                 if (this._basemaps[selectedIndex].overlays) {
@@ -143,39 +188,34 @@ define([
                 }
             },
 
-            toggleOverlay: function(selectedIndex) {
-                var layers = this._overlays[selectedIndex].services;
-                array.forEach(layers, function(targetId){
-                    var layer = this.layerCollection.getLayerById(targetId);
-                    layer.setVisibility(! layer.visible);
-                }, this);
-            },
-
             setOverlayVisibility: function(selectedIndex, visible) {
-                var layers = this._overlays[selectedIndex].services;
-                array.forEach(layers, function(targetId){
-                    var layer = this.layerCollection.getLayerById(targetId);
-                    layer.setVisibility(visible);
-                }, this);
+                var overlayServices = this._overlays[selectedIndex].services;
+                array.forEach(overlayServices, lang.hitch(this, function(overlayService){                                        
+                    if (overlayService.sublayers) {
+                        topic.publish('/ngdc/sublayer/visibility', overlayService.id, overlayService.sublayers, visible);
+                    } else{
+                        topic.publish('/ngdc/layer/visibility', overlayService.id, visible);
+                    }                   
+                }));
             },
 
             postCreate: function() {
                 //this.inherited(arguments);
 
                 //add menu items to basemap menu
-                array.forEach(this._basemaps, function(item, idx) {
+                array.forEach(this._basemaps, lang.hitch(this, function(item, idx) {
                     this._addBasemapMenuItem(this.basemapMenu, item, idx, this);
-                }, this);
+                }));
 
                 //add menu items to overlay menu
-                array.forEach(this._overlays, function(item, idx) {
+                array.forEach(this._overlays, lang.hitch(this, function(item, idx) {
                     this._addOverlayMenuItem(this.overlayMenu, item, idx, this);
-                }, this);
+                }));
 
                  //add menu items to overlay menu
-                array.forEach(this._identifyTools, function(item, idx) {
+                array.forEach(this._identifyTools, lang.hitch(this, function(item, idx) {
                     this._addIdentifyMenuItem(this.identifyMenu, item, idx, this);
-                }, this);
+                }));
 
                 this.showBasemap(this.defaultBasemapIndex);
             },
@@ -190,12 +230,11 @@ define([
             },
 
             _addOverlayMenuItem: function(menu, item, idx, parent) {
-                var layer = this.layerCollection.getLayerById(item.services[0]);
                 menu.addChild(new CheckedMenuItem({
                     label: item.label,
-                    checked: layer.visible,
+                    checked: item.visible,
                     onClick: function() {
-                        parent.toggleOverlay(idx);
+                        parent.setOverlayVisibility(idx, this.checked);
                     }
                 }));
             },
@@ -214,17 +253,15 @@ define([
                 //validate config by verifying each of the service ids are in LayerCollection
                 var allLayerIds = this.layerCollection.getLayerIds();
                 array.forEach(this._basemaps, function(basemap) {
-                    array.forEach(basemap.services, function(targetId){
-                        if (array.indexOf(allLayerIds, targetId) < 0) {
-                            console.error('MapToolbar configuration error: layer '+targetId+' not found in LayerCollection');
-                        }
-                    });
+                    if (array.indexOf(allLayerIds, basemap.base) < 0) {
+                        console.error('MapToolbar configuration error: layer '+basemap.base+' not found in LayerCollection');
+                    }                    
                 });
 
                 array.forEach(this._overlays, function(overlay) {
-                    array.forEach(overlay.services, function(targetId){
-                        if (array.indexOf(allLayerIds, targetId) < 0) {
-                            console.error('MapToolbar configuration error: overlay '+targetId+' not found in LayerCollection');
+                    array.forEach(overlay.services, function(service){
+                        if (array.indexOf(allLayerIds, service.id) < 0) {
+                            console.error('MapToolbar configuration error: overlay '+service.id+' not found in LayerCollection');
                         }
                     });
                 });
