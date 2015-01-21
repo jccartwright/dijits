@@ -35,6 +35,11 @@ define([
                     this.setSublayerVisibility(svcId, subLayers, visible);
                 }));
 
+                //Subscribe to message to set sublayer visibilities on a service, by name instead of index
+                topic.subscribe('/ngdc/sublayerByName/visibility', lang.hitch(this, function (svcId, subLayerNames, visible) {
+                    this.setSublayerVisibilityByName(svcId, subLayerNames, visible);
+                }));
+
                 //Subscribe to message to show/hide the entire service
                 topic.subscribe('/ngdc/layer/visibility', lang.hitch(this, function (svcId, visible) {
                     var svc = this.getLayerById(svcId);
@@ -167,7 +172,28 @@ define([
                 }, this);
             },
 
-            //Set the specified sublayers of svcId to be visible/invisible
+            //Set the specified sublayers of svcId to be visible/invisible. Sublayers are referred to by name.
+            setSublayerVisibilityByName: function(/*String*/ svcId, /*String[]*/ subLayerNames, /*boolean*/ visible) {
+                logger.debug('setSublayerVisibility ' + svcId + ' ' + subLayerNames + ' ' + visible);
+                var svc = this.getLayerById(svcId);
+                var layerIndexes = [];
+
+                if (svc) {
+                    //Find the sublayer indexes that match the names provided
+                    array.forEach(svc.layerInfos, lang.hitch(this, function(layerInfo) {
+                        array.forEach(subLayerNames, lang.hitch(this, function(subLayerName) {
+                            if (layerInfo.name === subLayerName) {
+                                layerIndexes.push(layerInfo.id);
+                            }
+                        }));
+                    }));
+                }
+                if (layerIndexes.length > 0) {
+                    this.setSublayerVisibility(svcId, layerIndexes, visible);
+                }
+            },
+
+            //Set the specified sublayers of svcId to be visible/invisible. Sublayers are referred to by index.
             setSublayerVisibility: function(/*String*/ svcId, /*int[]*/ subLayers, /*boolean*/ visible) {
                 logger.debug('setSublayerVisibility ' + svcId + ' ' + subLayers + ' ' + visible);
                 var svc = this.getLayerById(svcId);
