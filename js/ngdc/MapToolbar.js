@@ -12,6 +12,10 @@ define([
     'esri/toolbars/draw', 
     'esri/symbols/SimpleFillSymbol', 
     'esri/symbols/SimpleLineSymbol', 
+    'esri/tasks/GeometryService',
+    'esri/tasks/DensifyParameters',
+    'esri/tasks/ProjectParameters',
+    'esri/geometry/Polygon',
     'dojo/_base/Color',
     'dijit/form/DropDownButton', 
     'dijit/DropDownMenu', 
@@ -39,7 +43,11 @@ define([
         domClass,
         draw, 
         SimpleFillSymbol, 
-        SimpleLineSymbol, 
+        SimpleLineSymbol,
+        GeometryService,
+        DensifyParameters,
+        ProjectParameters,
+        Polygon,
         Color,
         DropDownButton, 
         DropDownMenu, 
@@ -144,6 +152,8 @@ define([
                     //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
                     this._addAreaOfInterestToMap(extent, true);
                 }));
+
+                this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
             },
 
             showBasemap: function(selectedIndex) {
@@ -327,18 +337,59 @@ define([
 
             //attached to onDrawEnd event when drawing geometry. Also called after defining extent with the BoundingBoxDialog.
             _addAreaOfInterestToMap: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
-                this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
-                this.map.graphics.add(this.map.identifyGraphic);
+                //If in Web Mercator, add the graphic to the map
+                if (this.map.spatialReference.isWebMercator()) {
+                    this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
+                    this.map.graphics.add(this.map.identifyGraphic);
+                    if (zoomToExtent) {
+                        this.map.setExtent(geometry, true);
+                    }
+                }
+                //If in another projection, densify the polygon and project it to the map's spatial reference
+                else {
+                    var densifyParams = new DensifyParameters();
+                    var projectParams = new ProjectParameters();
+
+                    var polygon = Polygon.fromExtent(geometry); //Create a polygon from the extent
+
+                    //Set the densify max segment length to be 1/20th of the width of the extent in degrees
+                    var extentWidth = Math.abs(geometry.xmax - geometry.xmin);
+                    densifyParams.maxSegmentLength = extentWidth / 20;
+
+                    densifyParams.geodesic = false;
+                    densifyParams.geometries = [polygon];
+                    //Densify the geometry
+                    this.geometryService.densify(densifyParams, lang.hitch(this, function(geometries) {
+
+                        projectParams.geometries = geometries;
+                        projectParams.outSR = this.map.spatialReference;
+                        projectParams.transformForward = true;
+
+                        //Project the densififed geometry
+                        this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {                            
+                            var geometry = geometries[0];
+
+                            //Add the graphic to the map
+                            this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
+                            this.map.graphics.add(this.map.identifyGraphic);
+                            if (zoomToExtent) {
+                                this.map.setExtent(geometry.getExtent(), true);
+                            }
+                        }), function(error) {
+                            logger.error(error);
+                        });
+
+                    }), function(error) {
+                        logger.error(error);
+                    });
+                }
+                
 
                 //only allow one shape to be drawn
                 this._drawToolbar.deactivate();
                 this.map.showZoomSlider();
 
                 topic.publish('/ngdc/geometry', this.geometryToGeographic(geometry));
-
-                if (zoomToExtent) {
-                    this.map.setExtent(geometry, true);
-                }
 
                 this.clickHandler.resume(); //Resume map click events if they were paused
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
