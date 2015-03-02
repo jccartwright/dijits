@@ -123,6 +123,8 @@ define([
             constructor: function(/*Object*/ kwArgs) {
                 this.layerCollection = kwArgs.layerCollection;
                 this.map = kwArgs.map;
+                this.minLat = kwArgs.minLat;
+                this.maxLat = kwArgs.maxLat;
 
                 this._drawToolbar = new Draw(this.map);
                 Connect.connect(this._drawToolbar, 'onDrawEnd', this, this._addAreaOfInterestToMap);
@@ -144,13 +146,17 @@ define([
                 }));
 
                 topic.subscribe('/ngdc/BoundingBoxDialog/cancel', lang.hitch(this, function() {
-                    //BoundingBoxDialog canceled, switch to pointer icon
-                    this._setIdentifyIcon('identifyByPointIcon');
+                    if (this.enabled) {
+                        //BoundingBoxDialog canceled, switch to pointer icon
+                        this._setIdentifyIcon('identifyByPointIcon');
+                    }
                 }));
 
                 topic.subscribe('/ngdc/BoundingBoxDialog/extent', lang.hitch(this, function(extent) {
-                    //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
-                    this._addAreaOfInterestToMap(extent, true);
+                    if (this.enabled) {
+                        //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
+                        this._addAreaOfInterestToMap(extent, true);
+                    }
                 }));
 
                 this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
@@ -330,7 +336,14 @@ define([
             _identifyByCoords: function() {
                 this.map.graphics.clear();
                 if (!this.bboxDialog) {
-                    this.bboxDialog = new BoundingBoxDialog({map: this.map});
+                    this.bboxDialog = new BoundingBoxDialog({
+                        map: this.map, 
+                        minLat: this.minLat ? this.minLat : -85, 
+                        maxLat: this.maxLat ? this.maxLat : 85
+                    });
+                    if (this.bboxDialogTitle) {
+                        this.bboxDialog.set('title', this.bboxDialogTitle);
+                    }
                 }
                 this.bboxDialog.show();
             },            
