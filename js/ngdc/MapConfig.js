@@ -175,6 +175,10 @@ define([
                         this.identifyPane.disable();
                     }
                 }
+
+                if (this.mapToolbar) {
+                    this.mapToolbar.enabled = enabled;
+                }
                 
                 //TODO Suspend/resume the entire LayerCollection for this MapConfig?
                 // this.mapLayerCollection.resume();
