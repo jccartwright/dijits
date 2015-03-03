@@ -350,15 +350,17 @@ define([
 
             //attached to onDrawEnd event when drawing geometry. Also called after defining extent with the BoundingBoxDialog.
             _addAreaOfInterestToMap: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
-                //If in Web Mercator, add the graphic to the map
-                if (this.map.spatialReference.isWebMercator()) {
+                //If in Web Mercator, add the graphic to the map.
+                //Alternatively, if in Arctic/Antarctic, and the user drew a polygon, add the graphic to the map.
+                if (this.map.spatialReference.isWebMercator() || geometry.type == 'polygon') {
                     this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
                     this.map.graphics.add(this.map.identifyGraphic);
                     if (zoomToExtent) {
                         this.map.setExtent(geometry, true);
                     }
                 }
-                //If in another projection, densify the polygon and project it to the map's spatial reference
+                //In other projections, and if the geometry is an extent, 
+                //convert the extent to a polygon, densify it, and project it to the map's spatial reference
                 else {
                     var densifyParams = new DensifyParameters();
                     var projectParams = new ProjectParameters();
