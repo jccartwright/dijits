@@ -41,7 +41,6 @@ define([
             title: 'Enter Coordinates to Identify Features',
 
             constructor: function(/*Object*/ kwArgs) {
-                console.log('inside BoundingBoxDialog constructor...');
                 lang.mixin(this, kwArgs);
             },
 
@@ -64,6 +63,12 @@ define([
                         this.submitButton.set('disabled', true);
                     }
                 });
+
+                this.maxyInput.set('constraints', {min: this.minLat, max: this.maxLat});
+                this.maxyInput.set('invalidMessage', 'latitude must be between ' + this.minLat + ' and ' + this.maxLat);
+                this.minyInput.set('constraints', {min: this.minLat, max: this.maxLat});
+                this.minyInput.set('invalidMessage', 'latitude must be between ' + this.minLat + ' and ' + this.maxLat);
+                this.unitsText.innerHTML = 'Latitude: ' + this.minLat + ' to ' + this.maxLat + '; Longitude: -180 to 180<br/>(signed decimal degrees)'
             },
 
             execute: function(formContents) {

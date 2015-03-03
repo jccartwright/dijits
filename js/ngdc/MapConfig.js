@@ -65,7 +65,7 @@ define([
                 //add all layers to Map
                 this.map.addLayers(this.mapLayerCollection.mapServices);
 
-                this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/rest/services/Geometry/GeometryServer');
+                this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
                 this.loadingIconEnabled = true;
             },  //end constructor
@@ -174,6 +174,10 @@ define([
                     } else {
                         this.identifyPane.disable();
                     }
+                }
+
+                if (this.mapToolbar) {
+                    this.mapToolbar.enabled = enabled;
                 }
                 
                 //TODO Suspend/resume the entire LayerCollection for this MapConfig?
