@@ -68,6 +68,12 @@ define([
                 this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
                 this.loadingIconEnabled = true;
+
+                this.map.on('update-start', lang.hitch(this, this.showLoading));
+                this.map.on('update-end', lang.hitch(this, this.hideLoading));
+
+                topic.subscribe('/ngdc/showLoading', lang.hitch(this, this.showLoading));
+                topic.subscribe('/ngdc/hideLoading', lang.hitch(this, this.hideLoading));
             },  //end constructor
 
             layerAddResultHandler: function( evt ) {
@@ -112,12 +118,6 @@ define([
                 //setup mouse event handlers
                 this.map.on('mouse-move', lang.hitch(this, this.showCoordinates));
                 this.map.on('mouse-drag', lang.hitch(this, this.showCoordinates));
-
-                this.map.on('update-start', lang.hitch(this, this.showLoading));
-                this.map.on('update-end', lang.hitch(this, this.hideLoading));
-
-                topic.subscribe('/ngdc/showLoading', lang.hitch(this, this.showLoading));
-                topic.subscribe('/ngdc/hideLoading', lang.hitch(this, this.hideLoading));
             },
 
             //Show coordinates when moving the mouse, updates limited to every 100ms.
