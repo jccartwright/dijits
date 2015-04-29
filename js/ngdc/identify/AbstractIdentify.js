@@ -177,7 +177,7 @@ define([
             },
 
             resetMapInfoWindow: function() {
-                console.log('resetting map infoWindow...');
+                logger.debug('resetting map infoWindow...');
                 this._map.infoWindow.hide();
                 this._map.infoWindow.clearFeatures();
             },

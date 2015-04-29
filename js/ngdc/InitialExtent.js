@@ -8,7 +8,7 @@ define([
         ){
         return declare([Extent], {
             constructor: function() {
-                console.log('inside constructor...');
+                //console.log('inside constructor...');
             },
 
             sayHello: function() {
