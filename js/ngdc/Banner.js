@@ -3,6 +3,7 @@ define([
     'dijit/_WidgetBase', 
     'dijit/_TemplatedMixin', 
     'dojo/string', 
+    'dojo/dom-attr',
     'dojo/text!./templates/Banner.html'
     ],
     function(
@@ -10,6 +11,7 @@ define([
         _WidgetBase, 
         _TemplatedMixin, 
         string, 
+        domAttr,
         template
         ){
         return declare([_WidgetBase, _TemplatedMixin], {
@@ -28,9 +30,9 @@ define([
                 if (!this.breadcrumbs) {
                     //set default breadcrumbs
                     this.breadcrumbs = [
-                        {url: 'http://www.noaa.gov', label: 'NOAA'},
-                        {url: 'http://www.nesdis.noaa.gov', label: 'NESDIS'},
-                        {url: 'http://www.ngdc.noaa.gov', label: 'NGDC'}
+                        {url: '//www.noaa.gov', label: 'NOAA', title: 'Go to the National Oceanic and Atmospheric Administration home'},
+                        {url: '//www.nesdis.noaa.gov', label: 'NESDIS', title: 'Go to the National Environmental Satellite, Data, and Information Service home'},
+                        {url: '//www.ngdc.noaa.gov', label: 'NCEI (formerly NGDC)', title: 'Go to the National Centers for Environmental Information (formerly the National Geophysical Data Center) home'}
                     ];
                 }
 
@@ -57,15 +59,26 @@ define([
             },
 
             postCreate: function(){
-                var template = '<a href="${url}" class="topnav" target="_blank">${label}</a>';
+                if (!this.breadcrumbs[0].title) {
+                    this.breadcrumbs[0].title = '';
+                }
+                var template = '<a href="${url}" title="${title}" class="topnav" target="_blank">${label}</a>';
                 var content = string.substitute(template, this.breadcrumbs[0]);
                 var i = 0;
                 for (i = 1; i < this.breadcrumbs.length; i++) {
+                    if (!this.breadcrumbs[i].title) {
+                        this.breadcrumbs[i].title = '';
+                    }
                     content += '&nbsp;&gt;&nbsp;' + string.substitute(template, this.breadcrumbs[i]);
                 }
                 this.breadcrumbsCell.innerHTML = content;
 
                 this.bannerDataUrl.href = this.dataUrl;
+
+                if (this.imageAlt) {
+                    domAttr.set(this.mapserviceImg, 'alt', this.imageAlt);
+                    domAttr.set(this.bannerDataUrl, 'title', this.imageAlt);
+                }
             }
         });
     }
