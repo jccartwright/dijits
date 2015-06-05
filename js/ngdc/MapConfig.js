@@ -29,19 +29,17 @@ define([
 
                 this.mapLayerCollection = mapLayerCollection;
 
-                this.map.on('load', function(evt){
-                    if (options.overview) {
-                        var overviewMap = new OverviewMap({
-                            map: evt.map,
-                            attachTo: 'bottom-right',
-                            width: 150,
-                            height: 120,
-                            visible: true,
-                            opacity: 0.3
-                        });
-                        overviewMap.startup();
-                    }
-                });
+                if (options.overview) {
+                    var overviewMap = new OverviewMap({
+                        map: this.map,
+                        attachTo: 'bottom-right',
+                        width: 150,
+                        height: 120,
+                        visible: true,
+                        opacity: 0.3
+                    });
+                    overviewMap.startup();
+                }
 
                 //If custom lods are used, the first defined zoom level will be considered level 0. 
                 //However, we want access to the absolute level (i.e. 2 instead of 0).
