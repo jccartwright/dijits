@@ -125,6 +125,7 @@ define([
                 this.map = kwArgs.map;
                 this.minLat = kwArgs.minLat;
                 this.maxLat = kwArgs.maxLat;
+                this.enabled = true; //Enabled by default; set enabled=false after initialization if you don't want it to be active on startup (i.e. Arctic/Antarctic maps)
 
                 this._drawToolbar = new Draw(this.map);
                 Connect.connect(this._drawToolbar, 'onDrawEnd', this, this._addAreaOfInterestToMap);
