@@ -45,6 +45,7 @@ define([
                 this._tiledService = params.tiledService;
                 this._cutoffZoom = params.cutoffZoom;
                 this.visible = params.visible;
+                this.opacity = params.opacity;
                 this._map = map;
 
                 //TODO ??
