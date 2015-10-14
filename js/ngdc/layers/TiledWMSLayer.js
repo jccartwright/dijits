@@ -19,10 +19,17 @@ define([
 
             constructor: function(baseUrl) {
                 this.baseUrl = baseUrl;
-                this.layerName = arguments[1].layerName;
+                this.layerNames = arguments[1].layerNames;
+                this.wmsVersion = arguments[1].wmsVersion || '1.3.0';
+                this.transparent = arguments[1].transparent || 'TRUE';
+                this.format = arguments[1].format || 'jpeg';
+                this.srsOrCrs = 'SRS';
+                if (this.wmsVersion == '1.3.0') {
+                    this.srsOrCrs = 'CRS'
+                }
+                this.epsgCode = arguments[1].epsgCode || '3857';
 
-                this.spatialReference = new SpatialReference({ wkid: 102100 });
-                this.initialExtent = (this.fullExtent = new Extent(-20037507.067161843, -19971868.8804086, 20037507.067161843, 19971868.8804086, this.spatialReference));
+                this.initialExtent = (this.fullExtent = new Extent(-20037507.067161843, -19971868.8804086, 20037507.067161843, 19971868.8804086, new SpatialReference({ wkid: 102100 })));
 
                 var zoomLevels = new ZoomLevels();
 
@@ -45,8 +52,13 @@ define([
             }, //end constructor function
 
             getTileUrl: function(level, row, col) {
-                var urlParams = '&REQUEST=GetMap&SERVICE=WMS&VERSION=1.1.1&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&WIDTH=256&HEIGHT=256&reaspect=false&STYLES=&FORMAT=image/jpeg&SRS=EPSG:3857' + '&LAYERS=' + this.layerName;
+                var urlParams = 'REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&WIDTH=256&HEIGHT=256&reaspect=false' +
+                    '&' + this.srsOrCrs + '=EPSG:' + this.epsgCode +
+                    '&LAYERS=' + this.layerNames.join(',') + 
+                    '&VERSION=' + this.wmsVersion + 
+                    '&FORMAT=image/' + this.format;
 
+                //Get the lat/lon extent of the current tile
                 var llExtent = new Extent(
                     this.tile2long(col, level), 
                     this.tile2lat(row+1, level), 
@@ -54,6 +66,7 @@ define([
                     this.tile2lat(row, level), 
                     new SpatialReference({wkid:4326})
                 );
+                //Project it to Web Mercator
                 var webMercatorExtent = webMercatorUtils.geographicToWebMercator(llExtent);
 
                 return this.baseUrl + urlParams + '&BBOX=' + 
@@ -63,6 +76,8 @@ define([
                     webMercatorExtent.ymax;
             },
 
+            //Methods to get the lower-left coordinates of the specified tile.
+            //Taken from here: http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#ECMAScript_.28JavaScript.2FActionScript.2C_etc..29
             tile2long: function(x, z) {
                 return (x/Math.pow(2,z)*360-180);
             },
