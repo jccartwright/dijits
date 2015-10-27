@@ -8,7 +8,8 @@ define([
     'dojo/_base/array', 
     'dojo/topic', 
     'dojo/_base/lang', 
-    'dojo/dom'
+    'dojo/dom',
+    'esri/request'
     ],
     function(
         declare, 
@@ -20,7 +21,8 @@ define([
         array, 
         topic, 
         lang, 
-        dom
+        dom,
+        request
         ){
 
         return declare([], {
@@ -116,6 +118,9 @@ define([
                 //setup mouse event handlers
                 this.map.on('mouse-move', lang.hitch(this, this.showCoordinates));
                 this.map.on('mouse-drag', lang.hitch(this, this.showCoordinates));
+
+                //this needs to be separate from showCoordinates because it has a different behaviour and timer
+                this.map.on('mouse-move', lang.hitch(this, this.showDepthCoordinates));
             },
 
             //Show coordinates when moving the mouse, updates limited to every 100ms.
@@ -180,6 +185,37 @@ define([
                 
                 //TODO Suspend/resume the entire LayerCollection for this MapConfig?
                 // this.mapLayerCollection.resume();
+            },
+
+            //Show depth when mouse stops moving for 500ms. Different behaviour from showCoordinates which fires
+            //periodically while the mouse is moving
+            movementTimer: null,
+            showDepthCoordinates: function(evt) {
+                clearTimeout(this.movementTimer);
+
+                this.movementTimer = setTimeout(lang.hitch(this, function () {
+                    this.getDepth(this.mapPointToGeographic(evt.mapPoint));
+                }), 500);
+            },
+
+            getDepth: function (geoPoint) {
+                request({
+                    url: 'http://gis.ngdc.noaa.gov/arcgis/rest/services/DEM_SeaLevel/ImageServer/identify',
+                    content: {
+                        geometry: geoPoint.x+','+geoPoint.y,
+                        geometryType:'esriGeometryPoint',
+                        returnGeometry:false,
+                        returnCatalogItems:false,
+                        f:'json'
+                    }
+                }).then(function(data) {
+                    //augment incoming Point with retrieved depth value
+                    geoPoint.z = data.value;
+                    topic.publish('/ngdc/mouseposition', geoPoint);
+
+                }, function(err) {
+                    console.error("Error getting depth: ",err);
+                });
             }
         });
     }
