@@ -37,7 +37,6 @@ define([
             _scalebarThreshold: null,
 
             constructor: function(/*Object*/ kwArgs) {
-                console.log(kwArgs);
                 this._map = kwArgs.map;
                 if (kwArgs.scalebarThreshold) {
                     this._scalebarThreshold = kwArgs.scalebarThreshold;
