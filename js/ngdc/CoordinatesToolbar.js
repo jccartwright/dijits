@@ -34,32 +34,58 @@ define([
             baseClass: 'coordinatesToolbar',
             _map: null,
             _scalebar: null,
+            _scalebarThreshold: null,
 
             constructor: function(/*Object*/ kwArgs) {
+                console.log(kwArgs);
                 this._map = kwArgs.map;
+                if (kwArgs.scalebarThreshold) {
+                    this._scalebarThreshold = kwArgs.scalebarThreshold;
+                }
             },
 
             postCreate: function() {
                 this._scalebar = new Scalebar({map: this._map, scalebarUnit: 'dual'}, this.scalebar);
-                //globals.scalebar.hide(); // scalebar is hidden by default at small scales
 
-                //TODO dispose of handle on unload
-                var handle = topic.subscribe('/ngdc/mouseposition', lang.hitch(this, function(mapPoint) {
-                    this.coordsDiv.innerHTML = mapPoint.x.toFixed(3) + '°, ' + mapPoint.y.toFixed(3) + '°';
-                }));
+                this.own(
+                    topic.subscribe('/ngdc/mouseposition', lang.hitch(this, function(mapPoint) {
+                        this.coordsDiv.innerHTML = mapPoint.x.toFixed(3) + '°, ' + mapPoint.y.toFixed(3) + '°';
+                    }))
+                );
+
+                if (this._scalebarThreshold) {
+                    //initialize
+                    this.toggleScalebar();
+
+                    //update on each  zoom
+                    this.own (
+                        on( this._map, 'zoom-end', lang.hitch(this, 'toggleScalebar'))
+                    );
+                }
             },
 
+
+            toggleScalebar: function() {
+                if (this._map.getAbsoluteLevel() <= this._scalebarThreshold) {
+                    this.hideScalebar();
+                } else {
+                    this.showScalebar();
+                }
+            },
+
+            //These need to be on a short timer due to unexpected errors during the zoom animation
             showScalebar: function() {
-                this._scalebar.show();
-                domStyle.set(this.domNode, 'height', '55px');
+                setTimeout(lang.hitch(this, function() {
+                    this._scalebar.show();
+                    domStyle.set(this.domNode, 'height', '55px');
+                }), 100);
             },
 
             hideScalebar: function() {
-                this._scalebar.hide();
-                domStyle.set(this.domNode, 'height', '18px');
+                setTimeout(lang.hitch(this,function() {
+                    this._scalebar.hide();
+                    domStyle.set(this.domNode, 'height', '18px');
+                }), 100);
             }
         });
     });
-
-
-
