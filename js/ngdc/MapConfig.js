@@ -26,10 +26,16 @@ define([
         ){
 
         return declare([], {
+            showElevation: true,
+
             constructor: function(divId, options, mapLayerCollection) {
                 this.map = new Map(divId, options);
 
                 this.mapLayerCollection = mapLayerCollection;
+
+                if (options.noElevation) {
+                    this.showElevation = false;
+                }
 
                 if (options.overview) {
                     var overviewMap = new OverviewMap({
@@ -120,7 +126,9 @@ define([
                 this.map.on('mouse-drag', lang.hitch(this, this.showCoordinates));
 
                 //this needs to be separate from showCoordinates because it has a different behaviour and timer
-                this.map.on('mouse-move', lang.hitch(this, this.showDepthCoordinates));
+                if (this.showElevation) {
+                    this.map.on('mouse-move', lang.hitch(this, this.showDepthCoordinates));
+                }
             },
 
             //Show coordinates when moving the mouse, updates limited to every 100ms.
