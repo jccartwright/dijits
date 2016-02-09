@@ -28,6 +28,7 @@ define([
                     this.srsOrCrs = 'CRS'
                 }
                 this.epsgCode = arguments[1].epsgCode || '3857';
+                this.sld = arguments[1].sld;
 
                 this.initialExtent = (this.fullExtent = new Extent(-20037507.067161843, -19971868.8804086, 20037507.067161843, 19971868.8804086, new SpatialReference({ wkid: 102100 })));
 
@@ -57,6 +58,9 @@ define([
                     '&LAYERS=' + this.layerNames.join(',') + 
                     '&VERSION=' + this.wmsVersion + 
                     '&FORMAT=image/' + this.format;
+                if (this.sld) {
+                    urlParams += '&SLD=' + this.sld;
+                }
 
                 //Get the lat/lon extent of the current tile
                 var llExtent = new Extent(
@@ -69,7 +73,7 @@ define([
                 //Project it to Web Mercator
                 var webMercatorExtent = webMercatorUtils.geographicToWebMercator(llExtent);
 
-                return this.baseUrl + urlParams + '&BBOX=' + 
+                return this.baseUrl + urlParams + '&BBOX=' +
                     webMercatorExtent.xmin + ',' + 
                     webMercatorExtent.ymin + ',' + 
                     webMercatorExtent.xmax + ',' + 
