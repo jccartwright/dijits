@@ -9,13 +9,13 @@ define([
     'dojo/_base/lang', 
     'dojo/_base/array', 
     'dojo/dom-class',
+    'esri/tasks/GeometryService',
+    'esri/tasks/ProjectParameters',
     'esri/toolbars/draw', 
     'esri/symbols/SimpleFillSymbol', 
     'esri/symbols/SimpleLineSymbol', 
-    'esri/tasks/GeometryService',
-    'esri/tasks/DensifyParameters',
-    'esri/tasks/ProjectParameters',
     'esri/geometry/Polygon',
+    'esri/geometry/geometryEngine',
     'dojo/_base/Color',
     'dijit/form/DropDownButton', 
     'dijit/DropDownMenu', 
@@ -41,13 +41,13 @@ define([
         lang, 
         array, 
         domClass,
+        GeometryService,
+        ProjectParameters,
         draw, 
         SimpleFillSymbol, 
         SimpleLineSymbol,
-        GeometryService,
-        DensifyParameters,
-        ProjectParameters,
         Polygon,
+        geometryEngine,
         Color,
         DropDownButton, 
         DropDownMenu, 
@@ -128,7 +128,7 @@ define([
                 this.enabled = true; //Enabled by default; set enabled=false after initialization if you don't want it to be active on startup (i.e. Arctic/Antarctic maps)
 
                 this._drawToolbar = new Draw(this.map);
-                Connect.connect(this._drawToolbar, 'onDrawEnd', this, this._addAreaOfInterestToMap);
+                Connect.connect(this._drawToolbar, 'onDrawEnd', this, this._addAreaOfInterestToMapAndIdentify);
 
                 this.clickHandler = on.pausable(this.map, 'click', function(evt) {
                     topic.publish('/ngdc/mapPoint', evt.mapPoint);
@@ -156,11 +156,18 @@ define([
                 topic.subscribe('/ngdc/BoundingBoxDialog/extent', lang.hitch(this, function(extent) {
                     if (this.enabled) {
                         //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
-                        this._addAreaOfInterestToMap(extent, true);
+                        if (this.map.spatialReference.isWebMercator()) {
+                            //If in Web Mercator, pass the extent as-is.
+                            this._addAreaOfInterestToMapAndIdentify(extent, true);
+                        }
+                        else {
+                            //In polar coordinates, need to densify and project the geometry first.
+                            this._densifyAndProjectExtentAndIdentify(extent);
+                        }
                     }
                 }));
 
-                this.geometryService = new GeometryService('http://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
+                this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
             },
 
             showBasemap: function(selectedIndex) {
@@ -349,66 +356,59 @@ define([
                 this.bboxDialog.show();
             },            
 
-            //attached to onDrawEnd event when drawing geometry. Also called after defining extent with the BoundingBoxDialog.
-            _addAreaOfInterestToMap: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
-                //If in Web Mercator, add the graphic to the map.
-                //Alternatively, if in Arctic/Antarctic, and the user drew a polygon, add the graphic to the map.
-                if (this.map.spatialReference.isWebMercator() || geometry.type == 'polygon') {
-                    this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
-                    this.map.graphics.add(this.map.identifyGraphic);
-                    if (zoomToExtent) {
-                        this.map.setExtent(geometry, true);
-                    }
+            //Add the extent/polygon to the map and publish to the identify dijit.
+            //Attached to onDrawEnd event when drawing geometry. Also called from _densifyAndProjectExtentAndIdentify().
+            _addAreaOfInterestToMapAndIdentify: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
+                this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
+                this.map.graphics.add(this.map.identifyGraphic);
+                if (zoomToExtent) {
+                    this.map.setExtent(geometry, true);
                 }
-                //In other projections, and if the geometry is an extent, 
-                //convert the extent to a polygon, densify it, and project it to the map's spatial reference
+
+                //If in Web Mercator, add the graphic to the map and publish to the identify. Works with any extents or polygons, even crossing antimeridian.
+                if (this.map.spatialReference.isWebMercator()) {
+                    topic.publish('/ngdc/geometry', geometry);
+                }
+                //In other projections, only a polygon (not extent) works with the ArcGIS REST identify, if it crosses the antimeridian. 
+                //Convert any extent to a polygon, then publish to the identify.
                 else {
-                    var densifyParams = new DensifyParameters();
-                    var projectParams = new ProjectParameters();
-
-                    var polygon = Polygon.fromExtent(geometry); //Create a polygon from the extent
-
-                    //Set the densify max segment length to be 1/20th of the width of the extent in degrees
-                    var extentWidth = Math.abs(geometry.xmax - geometry.xmin);
-                    densifyParams.maxSegmentLength = extentWidth / 20;
-
-                    densifyParams.geodesic = false;
-                    densifyParams.geometries = [polygon];
-                    //Densify the geometry
-                    this.geometryService.densify(densifyParams, lang.hitch(this, function(geometries) {
-
-                        projectParams.geometries = geometries;
-                        projectParams.outSR = this.map.spatialReference;
-                        projectParams.transformForward = true;
-
-                        //Project the densififed geometry
-                        this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {                            
-                            var geometry = geometries[0];
-
-                            //Add the graphic to the map
-                            this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
-                            this.map.graphics.add(this.map.identifyGraphic);
-                            if (zoomToExtent) {
-                                this.map.setExtent(geometry.getExtent(), true);
-                            }
-                        }), function(error) {
-                            logger.error(error);
-                        });
-
-                    }), function(error) {
-                        logger.error(error);
-                    });
+                    var polygon = geometry;
+                    if (geometry.type == 'extent') {
+                        polygon = Polygon.fromExtent(geometry); //Create a polygon from the extent
+                    }
+                    topic.publish('/ngdc/geometry', polygon);
                 }
                 
-
                 //only allow one shape to be drawn
                 this._drawToolbar.deactivate();
                 this.map.showZoomSlider();
-
-                topic.publish('/ngdc/geometry', this.geometryToGeographic(geometry));
-
                 this.clickHandler.resume(); //Resume map click events if they were paused
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
+            },
+
+            //For polar projections, take a geographic extent and densify it, then project it to the local coordinate system. 
+            //Continue by adding it to the map and identifying.
+            //Called when returning from the BoundingBoxDialog.
+            _densifyAndProjectExtentAndIdentify: function(/*Extent*/ extent) {
+                var projectParams = new ProjectParameters();
+                var polygon = Polygon.fromExtent(extent); //Create a polygon from the extent
+
+                //Set the densify max segment length to be 1/20th of the width of the extent in degrees
+                var extentWidth = Math.abs(extent.xmax - extent.xmin);
+                var maxSegmentLength = extentWidth / 20;
+                var densifiedPolygon = geometryEngine.densify(polygon, maxSegmentLength);
+
+                projectParams.geometries = [densifiedPolygon];
+                projectParams.outSR = this.map.spatialReference;
+                projectParams.transformForward = true;
+
+                //Project the densififed geometry
+                this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {                            
+                    this._addAreaOfInterestToMapAndIdentify(geometries[0], true);
+                }), function(error) {
+                    logger.error(error);
+                });
+
             },
 
             geometryToGeographic: function(geometry) {
