@@ -141,20 +141,8 @@ define([
                 //If it's a Web Mercator map, zoom to the specified initial extent.
                 //We're doing this here instead of in the Map contructor, in order to properly handle antimeridian-crossing extents.
                 if (this.initialExtent && this.map.spatialReference.isWebMercator()) {
-                    var geographicExtent = this.clampExtentTo85(
-                        new Extent(this.initialExtent.xmin, this.initialExtent.ymin, this.initialExtent.xmax, this.initialExtent.ymax, {
-                        spatialReference:{wkid:4326}
-                    }));
-
-                    var webMercatorExtent = webMercatorUtils.geographicToWebMercator(geographicExtent);
-
-                    //Handles an antimeridian-crossing extent, where the west coordinate is in the Eastern Hemisphere, and the east coordinate is in the Western Hemisphere.
-                    //Subtract the width of the entire world from the left coordinate. The extent will extend beyond the standard Web Mercator bounds. This is what we want.
-                    if (webMercatorExtent.xmax < webMercatorExtent.xmin) {
-                        var worldWidth = 40075014.13432359; //Width of the map in Web Mercator
-                        webMercatorExtent.xmin -= worldWidth;
-                    }
-                    this.map.setExtent(webMercatorExtent, true);
+                    this.calculateWebMercatorExtent();
+                    this.map.setExtent(this.webMercatorExtent, true);
                 }
             },
 
@@ -251,6 +239,22 @@ define([
                 }, function(err) {
                     console.error("Error getting depth: ",err);
                 });
+            },
+
+            calculateWebMercatorExtent: function() {
+                var geographicExtent = this.clampExtentTo85(
+                    new Extent(this.initialExtent.xmin, this.initialExtent.ymin, this.initialExtent.xmax, this.initialExtent.ymax, {
+                    spatialReference:{wkid:4326}
+                }));
+
+                this.webMercatorExtent = webMercatorUtils.geographicToWebMercator(geographicExtent);
+
+                //Handles an antimeridian-crossing extent, where the west coordinate is in the Eastern Hemisphere, and the east coordinate is in the Western Hemisphere.
+                //Subtract the width of the entire world from the left coordinate. The extent will extend beyond the standard Web Mercator bounds. This is what we want.
+                if (this.webMercatorExtent.xmax < this.webMercatorExtent.xmin) {
+                    var worldWidth = 40075014.13432359; //Width of the map in Web Mercator
+                    this.webMercatorExtent.xmin -= worldWidth;
+                }
             },
 
             //Ensure an extent doesn't go beyond the bounds of the Mercator map (85 N/S)
