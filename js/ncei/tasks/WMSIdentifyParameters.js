@@ -12,10 +12,11 @@ define([
     //"static" variables - shared across instances
     var INFO_FORMAT = "text/html";
     var WMS_VERSION = "1.3.0";
+    var MAX_FEATURES = 99;
 
     //used to construct QueryInfo part of URL. could be done w/in WMSIdentifyTask as well
     var QUERY_INFO_TEMPLATE = "REQUEST=GetFeatureInfo&SERVICE=WMS&WIDTH={width}&HEIGHT={height}&CRS={crs}"
-        + "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}"
+        + "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}&FEATURE_COUNT={max_features}"
         + "&BBOX={minx},{miny},{maxx},{maxy}&i={col}&j={row}";
 
 
@@ -60,6 +61,7 @@ define([
             var params = {
                 version: WMS_VERSION,
                 format: INFO_FORMAT,
+                max_features: MAX_FEATURES,
                 layers: this.layers,
                 width: this._map.width,
                 height: this._map.height,
