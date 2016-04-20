@@ -457,11 +457,14 @@ define([
                         return;
                     }
 
-                    clearTimeout(this.mouseOverTimer); //clear any existing timeout
-                    this.mouseOverTimer = setTimeout(lang.hitch(this, function(){
-                        //only fire a query if hovering for >100ms
-                        this.queryForHighlightGeometry(item);
-                    }), 100);
+                    //Only query for geometry if it's an ArcGIS service, not a WMS
+                    if (item.layerType !== 'WMS') {
+                        clearTimeout(this.mouseOverTimer); //clear any existing timeout
+                        this.mouseOverTimer = setTimeout(lang.hitch(this, function(){
+                            //only fire a query if hovering for >100ms
+                            this.queryForHighlightGeometry(item);
+                        }), 100);
+                    }
 
                     //TODO: cache feature geometries in a store to speed up subsequent mouseovers?
                     //Cache the first X features on load?
