@@ -319,6 +319,7 @@ define([
                             var item = results[svcName][layerName][i];
                             var layerKey = svcName + '/' + layerName;
                             var layerUrl = results[svcName][layerName][i].layerUrl;
+                            var layerType = results[svcName][layerName][j].layerType;
 
                             //Create a layer "folder" node if it doesn't already exist
                             if (this.featureStore.query({name: layerName}).length === 0) {
@@ -340,6 +341,7 @@ define([
                                 label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
                                 layerUrl: layerUrl,
                                 layerKey: layerKey,
+                                layerType: layerType,
                                 attributes: item.feature.attributes,
                                 parent: layerName,
                                 type: 'item'
