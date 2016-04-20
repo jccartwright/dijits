@@ -319,6 +319,7 @@ define([
                             var item = results[svcName][layerName][i];
                             var layerKey = svcName + '/' + layerName;
                             var layerUrl = results[svcName][layerName][i].layerUrl;
+                            var layerType = results[svcName][layerName][j].layerType;
 
                             //Create a layer "folder" node if it doesn't already exist
                             if (this.featureStore.query({name: layerName}).length === 0) {
@@ -340,6 +341,7 @@ define([
                                 label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
                                 layerUrl: layerUrl,
                                 layerKey: layerKey,
+                                layerType: layerType,
                                 attributes: item.feature.attributes,
                                 parent: layerName,
                                 type: 'item'
@@ -457,11 +459,14 @@ define([
                         return;
                     }
 
-                    clearTimeout(this.mouseOverTimer); //clear any existing timeout
-                    this.mouseOverTimer = setTimeout(lang.hitch(this, function(){
-                        //only fire a query if hovering for >100ms
-                        this.queryForHighlightGeometry(item);
-                    }), 100);
+                    //Only query for geometry if it's an ArcGIS service, not a WMS
+                    if (item.layerType !== 'WMS') {
+                        clearTimeout(this.mouseOverTimer); //clear any existing timeout
+                        this.mouseOverTimer = setTimeout(lang.hitch(this, function(){
+                            //only fire a query if hovering for >100ms
+                            this.queryForHighlightGeometry(item);
+                        }), 100);
+                    }
 
                     //TODO: cache feature geometries in a store to speed up subsequent mouseovers?
                     //Cache the first X features on load?
