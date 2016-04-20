@@ -16,6 +16,7 @@ define([
         ZoomLevels) {
 
         return declare([TiledMapServiceLayer], {
+            layerType: 'WMS',
 
             constructor: function(baseUrl) {
                 this.baseUrl = baseUrl;
@@ -53,6 +54,7 @@ define([
                 this.loaded = true;
                 this.onLoad(this);
             }, //end constructor function
+
 
             getTileUrl: function(level, row, col) {
                 var urlParams = 'REQUEST=GetMap&SERVICE=WMS&BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&reaspect=false' +
