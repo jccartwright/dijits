@@ -14,7 +14,10 @@ define([
     'esri/symbols/SimpleMarkerSymbol', 
     'esri/symbols/SimpleLineSymbol',
     'esri/graphic',
-    'ngdc/identify/IdentifyResultCollection'
+    'ngdc/identify/IdentifyResultCollection',
+    'ncei/tasks/WMSIdentifyParameters',
+    'ncei/tasks/WMSIdentifyTask',
+    'ncei/tasks/WMSIdentifyResult'
     ],
     function(
         declare, 
@@ -32,7 +35,10 @@ define([
         SimpleMarkerSymbol, 
         SimpleLineSymbol, 
         Graphic,
-        IdentifyResultCollection
+        IdentifyResultCollection,
+        WMSIdentifyParameters,
+        WMSIdentifyTask,
+        WMSIdentifyResult
         ) {
 
         return declare([], {
@@ -52,7 +58,9 @@ define([
             init: function(params) {
                 logger.debug('inside init...');
 
+                //list of queryable layers
                 this.layerIds = params[0].layerIds;
+
                 var layerCollection = params[0].layerCollection;
 
                 this._map = params[0].map;
@@ -130,6 +138,11 @@ define([
                 this.deferreds = {};
 
                 array.forEach(this.taskInfos, function(taskInfo){
+                    if (taskInfo.layer.layerType === 'WMS' && geometry.type !== 'point') {
+                        //WMS only handles points
+                        return;
+                    }
+
                     taskInfo.params.geometry = geometry;
 
                     if (taskInfo.enabled) {
@@ -155,7 +168,7 @@ define([
                     //create a list of service URLs for each layer to be used in IdentifyResultCollection
                     var serviceUrls = {};
                     array.forEach(this.taskInfos, function(taskInfo) {
-                            serviceUrls[taskInfo.layer.id] = taskInfo.layer.url;
+                        serviceUrls[taskInfo.layer.id] = taskInfo.layer.url;
                     });
 
                     var resultCollection = new IdentifyResultCollection(serviceUrls);
@@ -200,29 +213,49 @@ define([
 
                 array.forEach(layerIds, function(layerId) {
                     layer = layerCollection.getLayerById(layerId);
-                    //listen for changes to visibility in sublayers
-                    aspect.after(layer, 'setVisibleLayers', lang.hitch(this, lang.partial(this.updateVisibleLayers, layer)), true);
-
-                    //listen for changes in layer definitions in sublayers
-                    aspect.after(layer, 'setLayerDefinitions', lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
 
                     //listen for changes in layer visibility. This appears to handle show(), hide(), or setVisibility() calls.
                     aspect.after(layer, 'setVisibility', lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
 
                     logger.debug('creating IdentifyTask for URL '+layer.url);
-                    taskInfos.push({
-                        layer: layer,
-                        task: new IdentifyTask(layer.url),
-                        enabled: layer.visible,
-                        params: this.createIdentifyParams(layer)
-                    });
+                    if (layer.layerType == 'WMS') {
+                        //no layerDefinitions or sublayers in Tiled WMS.
+                        //TODO rethink in light of non-tiled WMS services where layers may be controlled individually
+                        taskInfos.push({
+                            layer: layer,
+                            task: new WMSIdentifyTask(layer.url),
+                            enabled: layer.visible,
+                            params: this.createWMSIdentifyParams(layer)
+                        });
+
+                    } else {
+                        //listen for changes to visibility in sublayers
+                        aspect.after(layer, 'setVisibleLayers', lang.hitch(this, lang.partial(this.updateVisibleLayers, layer)), true);
+
+                        //listen for changes in layer definitions in sublayers
+                        aspect.after(layer, 'setLayerDefinitions', lang.hitch(this, lang.partial(this.updateLayerDefinitions, layer)), true);
+
+                        taskInfos.push({
+                            layer: layer,
+                            task: new IdentifyTask(layer.url),
+                            enabled: layer.visible,
+                            params: this.createIdentifyParams(layer)
+                        });
+                    }
                 }, this);
                 return (taskInfos);
             },
 
-            createIdentifyParams: function(layer) {
-                logger.debug('inside createIdentifyParams...');
 
+            createWMSIdentifyParams: function(layer) {
+                var identifyParameters = new WMSIdentifyParameters({map: this._map});
+                identifyParameters.crs = 'EPSG:900913';
+                identifyParameters.layers = layer.layerNames.join(',');
+                return(identifyParameters);
+            },
+
+
+            createIdentifyParams: function(layer) {
                 var identifyParams = new IdentifyParameters();
                 identifyParams.tolerance = 3;
                 identifyParams.returnGeometry = false;

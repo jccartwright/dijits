@@ -47,11 +47,7 @@ define([
 
 
         execute: function(identifyParameters, callback, errback) {
-            console.log(this.url + identifyParameters.getQueryInfo());
-
-            var deferred = request.get(this.url + identifyParameters.getQueryInfo());
-
-            deferred.then(
+            var deferred = request.get(this.url + identifyParameters.getQueryInfo()).then(
                 lang.hitch(this, function(text) {
 
                     //scrape the HTML response for data since the plain text
@@ -64,20 +60,22 @@ define([
 
                     //<WMSIdentifyResult[]> list of returned features.
                     var responseData = [];
-                    var wmsIdentifyResult;
+
+                    var identifyResult;
 
                     query("tbody > tr", responseFragment).forEach(function(node, index, nodelist){
                         var attr = {};
                         query("td", node).forEach(function (node, index, nodelist) {
                             attr[headerFields[index]] = node.innerHTML;
                         });
-                        wmsIdentifyResult = new WMSIdentifyResult();
-                        wmsIdentifyResult.feature = new Graphic(null, null, attr, null);
-                        responseData.push(wmsIdentifyResult);
+                        identifyResult = new WMSIdentifyResult();
+                        identifyResult.feature = new Graphic(null, null, attr, null);
+                        responseData.push(identifyResult);
                     });
 
-                    //console.log(responseData);
                     this.emit('complete', {results: responseData});
+
+                    return responseData;
                 }),
 
 

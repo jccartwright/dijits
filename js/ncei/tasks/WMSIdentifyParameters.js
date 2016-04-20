@@ -30,7 +30,8 @@ define([
         //can be used to override previous properties
         getMapRequestUrl: null,
 
-        mapPoint: null,
+        //MapPoint
+        geometry: null,
 
         //keep a reference to the map to facilitate internal calculation of extent, screen position of mouse click
         _map: null,
@@ -47,7 +48,7 @@ define([
          */
         getQueryInfo: function() {
             //GetFeatureInfo requires the row,column of mouseclick rather than geographic coordinate
-            var screenGeom = screenUtils.toScreenGeometry(this._map.extent, this._map.width, this._map.height, this.mapPoint);
+            var screenGeom = screenUtils.toScreenGeometry(this._map.extent, this._map.width, this._map.height, this.geometry);
 
             //pull information out the the GetMap URL if provided. It will override layers, crs values input individually
             var queryObject;
