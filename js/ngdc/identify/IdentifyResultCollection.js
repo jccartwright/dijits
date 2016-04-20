@@ -7,9 +7,10 @@ define(['dojo/_base/declare'],
             anchorPoint: null,
             serviceUrls: null,
 
-            constructor: function(serviceUrls) {
+            constructor: function(serviceUrls, serviceTypes) {
                 logger.debug('inside constructor for ngdc/identify/IdentifyResultCollection');
                 this.serviceUrls = serviceUrls;
+                this.serviceTypes = serviceTypes;
             },
 
             setResultSet: function(results) {
@@ -44,6 +45,7 @@ define(['dojo/_base/declare'],
                         var result = results[svcId][i];
                         result.formatter = svcId+'/'+results[svcId][i].layerName;
                         result.layerUrl = this.serviceUrls[svcId] + '/' + results[svcId][i].layerId;
+                        result.layerType = this.serviceTypes[svcId];
                         result.svcId = svcId;
 
                         if (!this.results[svcId]) {
