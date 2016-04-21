@@ -9,7 +9,7 @@ define([
         displayFieldName: null,
         feature: null,
         layerId: null,
-        layerName: null
+        layerName: 'default'
 
         //no constructor
     });

@@ -419,7 +419,12 @@ define([
                 this.currentItem = item;
 
                 //Highlight the current geometry (specifically for touch-screen devices where the mouseOver event won't fire)
-                this.queryForHighlightGeometry(item);
+                if (item.layerType !== 'WMS') {
+                    domStyle.set(this.zoomToButton.domNode, 'display', ''); //show the "Zoom to" button
+                    this.queryForHighlightGeometry(item);
+                } else {
+                    domStyle.set(this.zoomToButton.domNode, 'display', 'none'); //hide the "Zoom to" button
+                }
 
                 this.setTitle('Attributes: ' + item.displayLabel);
 
