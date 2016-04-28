@@ -1,0 +1,21 @@
+{
+  "name": "dijits",
+  "version": "2.9.0",
+  "private": true,
+  "description": "shared dijits and classes used by the map viewers",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "preinstall": "bower install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://stash.ngdc.noaa.gov:8443/projects/GIS/repos/dijits"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.12.5",
+    "gulp": "^3.9.1",
+    "gulp-intern": "0.0.4",
+    "gulp-watch": "^4.3.5",
+    "intern": "^3.1.1"
+  }
+}
