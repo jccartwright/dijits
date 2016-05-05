@@ -15,9 +15,9 @@ define([
     var MAX_FEATURES = 99;
 
     //used to construct QueryInfo part of URL. could be done w/in WMSIdentifyTask as well
-    var QUERY_INFO_TEMPLATE = "REQUEST=GetFeatureInfo&SERVICE=WMS&WIDTH={width}&HEIGHT={height}&CRS={crs}"
-        + "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}&FEATURE_COUNT={max_features}"
-        + "&BBOX={minx},{miny},{maxx},{maxy}&i={col}&j={row}";
+    var QUERY_INFO_TEMPLATE = "REQUEST=GetFeatureInfo&SERVICE=WMS&WIDTH={width}&HEIGHT={height}&CRS={crs}" + 
+        "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}&FEATURE_COUNT={max_features}" +
+        "&BBOX={minx},{miny},{maxx},{maxy}&i={col}&j={row}";
 
 
     return declare([], {
@@ -90,8 +90,6 @@ define([
          */
         parseGetMapRequestUrl: function() {
             var wmsUrl = this.getMapRequestUrl;
-
-            var location = wmsUrl.substring(0, wmsUrl.indexOf('?') + 1);
 
             var queryString = wmsUrl.substring(wmsUrl.indexOf('?') + 1, wmsUrl.length);
             var queryObject = ioQuery.queryToObject(queryString);

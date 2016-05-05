@@ -16,8 +16,7 @@ define([
     'esri/graphic',
     'ngdc/identify/IdentifyResultCollection',
     'ncei/tasks/WMSIdentifyParameters',
-    'ncei/tasks/WMSIdentifyTask',
-    'ncei/tasks/WMSIdentifyResult'
+    'ncei/tasks/WMSIdentifyTask'
     ],
     function(
         declare, 
@@ -37,8 +36,7 @@ define([
         Graphic,
         IdentifyResultCollection,
         WMSIdentifyParameters,
-        WMSIdentifyTask,
-        WMSIdentifyResult
+        WMSIdentifyTask
         ) {
 
         return declare([], {
@@ -224,7 +222,7 @@ define([
                     aspect.after(layer, 'setVisibility', lang.hitch(this, lang.partial(this.updateVisibility, layer)), true);
 
                     logger.debug('creating IdentifyTask for URL '+layer.url);
-                    if (layer.layerType == 'WMS') {
+                    if (layer.layerType === 'WMS') {
                         //no layerDefinitions or sublayers in Tiled WMS.
                         //TODO rethink in light of non-tiled WMS services where layers may be controlled individually
                         taskInfos.push({
@@ -280,7 +278,7 @@ define([
                 logger.debug('inside updateVisibility with ' + layer.id + ' ' + layer.visible);
 
                 array.forEach(this.taskInfos, function(taskInfo){
-                    if (taskInfo.layer.id == layer.id) {
+                    if (taskInfo.layer.id === layer.id) {
                         taskInfo.enabled = layer.visible;
                     }
                 });
@@ -290,7 +288,7 @@ define([
                 logger.debug('inside updateVisibleLayers with '+layer.id+' visibleLayers: '+visibleLayers);
 
                 array.forEach(this.taskInfos, function(taskInfo){
-                    if (taskInfo.layer.id == layer.id) {
+                    if (taskInfo.layer.id === layer.id) {
                         taskInfo.params.layerIds = visibleLayers;
                     }
                 });
@@ -300,7 +298,7 @@ define([
                 logger.debug('inside updateLayerDefinitions with '+layer.id+' layerDefinitions: '+layerDefinitions);
 
                 array.forEach(this.taskInfos, function(taskInfo){
-                    if (taskInfo.layer.id == layer.id) {
+                    if (taskInfo.layer.id === layer.id) {
                         taskInfo.params.layerDefinitions = layerDefinitions;
                     }
                 });
