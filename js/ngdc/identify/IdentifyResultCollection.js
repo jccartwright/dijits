@@ -40,23 +40,24 @@ define(['dojo/_base/declare'],
                 //Augment each with formatter key composed of its layer and sublayer names, layerUrl, and service ID.
                 this.results = {};
                 for (var svcId in results) {
+                    if (results.hasOwnProperty(svcId)) {
 
-                    for (var i=0; i<results[svcId].length; i++) {
-                        var result = results[svcId][i];
-                        result.formatter = svcId+'/'+results[svcId][i].layerName;
-                        result.layerUrl = this.serviceUrls[svcId] + '/' + results[svcId][i].layerId;
-                        result.layerType = this.serviceTypes[svcId];
-                        result.svcId = svcId;
+                        for (var i=0; i<results[svcId].length; i++) {
+                            var result = results[svcId][i];
+                            result.formatter = svcId+'/'+results[svcId][i].layerName;
+                            result.layerUrl = this.serviceUrls[svcId] + '/' + results[svcId][i].layerId;
+                            result.layerType = this.serviceTypes[svcId];
+                            result.svcId = svcId;
 
-                        if (!this.results[svcId]) {
-                            this.results[svcId] = {};
+                            if (!this.results[svcId]) {
+                                this.results[svcId] = {};
+                            }
+                            if (!this.results[svcId][result.layerName]) {
+                                this.results[svcId][result.layerName] = [];
+                            }
+                            this.results[svcId][result.layerName].push(result);
                         }
-                        if (!this.results[svcId][result.layerName]) {
-                            this.results[svcId][result.layerName] = [];
-                        }
-                        this.results[svcId][result.layerName].push(result);
                     }
-
                 }
             }
         });

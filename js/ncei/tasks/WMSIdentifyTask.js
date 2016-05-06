@@ -7,8 +7,7 @@ define([
     "dojo/topic",
     "dojo/Evented",
     "esri/graphic",
-    "ncei/tasks/WMSIdentifyResult",
-    "ncei/tasks/WMSIdentifyParameters"
+    "ncei/tasks/WMSIdentifyResult"
 ], function(
     declare,
     request,
@@ -18,8 +17,8 @@ define([
     topic,
     Evented,
     Graphic,
-    WMSIdentifyResult,
-    WMSIdentifyParameters) {
+    WMSIdentifyResult
+    ) {
 
     //"static" variables - shared across instances
     var SAMPLE_URL = "http://geoservice.maris2.nl/wms/seadatanet/emodnet_hydrography";
@@ -27,7 +26,7 @@ define([
     return declare([Evented], {
         url: null,
 
-        constructor: function(url, options) {
+        constructor: function(url) {
             //use sample request if no URL provided
             this.url = url || SAMPLE_URL;
 
@@ -41,12 +40,12 @@ define([
                 this.url = 'http:' + this.url;
             }
             if (! this.url.endsWith('?')) {
-                this.url = this.url + '?'
+                this.url = this.url + '?';
             }
         },
 
 
-        execute: function(identifyParameters, callback, errback) {
+        execute: function(identifyParameters) {
             var deferred = request.get(this.url + identifyParameters.getQueryInfo()).then(
                 lang.hitch(this, function(text) {
 
@@ -54,7 +53,7 @@ define([
                     //format does not seem to contain all the information
                     var responseFragment = domConstruct.toDom(text);
                     var headerFields = [];
-                    query("th", responseFragment).forEach(function(node, index, nodelist){
+                    query("th", responseFragment).forEach(function(node){
                         headerFields.push(node.innerHTML);
                     });
 
@@ -63,9 +62,9 @@ define([
 
                     var identifyResult;
 
-                    query("tbody > tr", responseFragment).forEach(function(node, index, nodelist){
+                    query("tbody > tr", responseFragment).forEach(function(node){
                         var attr = {};
-                        query("td", node).forEach(function (node, index, nodelist) {
+                        query("td", node).forEach(function (node, index) {
                             attr[headerFields[index]] = node.innerHTML;
                         });
                         identifyResult = new WMSIdentifyResult();

@@ -1,7 +1,5 @@
 define(["dojo/_base/declare"],
     function(declare){
-        var lods;
-
         return declare([], {
             constructor: function() {
                 

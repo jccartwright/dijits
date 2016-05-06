@@ -140,7 +140,7 @@ define([
 
                 //Listen for an Escape keypress, which should deactivate any draw action
                 on(this.map, 'key-down', lang.hitch(this, function(evt) {
-                    if (evt.keyCode == 27 /*Esc key*/) {    
+                    if (evt.keyCode === 27 /*Esc key*/) {    
                         this._drawToolbar.deactivate(); //Deactivate any existing draw
                         this._setIdentifyIcon('identifyByPointIcon'); //Switch back to the pointer icon
                     }
@@ -177,7 +177,7 @@ define([
                     //Hide the base and overlays
                     topic.publish('/ngdc/layer/visibility', basemap.base, false);
 
-                    array.forEach(basemap.overlays, lang.hitch(this, function(overlay) {
+                    array.forEach(basemap.overlays, lang.hitch(this, function() {
                         this.setOverlayVisibility(this.defaultBoundariesIndex, false);
                     }));
 
@@ -310,25 +310,25 @@ define([
             _identifyByShape: function(shape) {
                 this.map.graphics.clear();
 
-                if (shape == 'rect') {
+                if (shape === 'rect') {
                     this._setIdentifyIcon('identifyByRectIcon');
                     this._drawToolbar.activate(Draw.EXTENT);
                 }
-                else if (shape == 'polygon') {
+                else if (shape === 'polygon') {
                     this._setIdentifyIcon('identifyByPolygonIcon');
                     this.clickHandler.pause(); //Pause the map click event
                     this._drawToolbar.activate(Draw.POLYGON);                    
                 }
-                else if (shape == 'freehand-polygon') {
+                else if (shape === 'freehand-polygon') {
                     this._setIdentifyIcon('identifyByPolygonIcon');
                     this._drawToolbar.activate(Draw.FREEHAND_POLYGON);
                 }
-                else if (shape == 'geodetic-circle') {
-                    //not yet implemented
-                }
-                else if (shape == 'planar-circle') {
-                    //not yet implemented
-                }
+                // else if (shape === 'geodetic-circle') {
+                //     //not yet implemented
+                // }
+                // else if (shape === 'planar-circle') {
+                //     //not yet implemented
+                // }
                 else {
                     logger.warn('Unrecognized geometry type for identify: ' + shape);
                 }
@@ -373,7 +373,7 @@ define([
                 //Convert any extent to a polygon, then publish to the identify.
                 else {
                     var polygon = geometry;
-                    if (geometry.type == 'extent') {
+                    if (geometry.type === 'extent') {
                         polygon = Polygon.fromExtent(geometry); //Create a polygon from the extent
                     }
                     topic.publish('/ngdc/geometry', polygon);

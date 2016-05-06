@@ -237,7 +237,7 @@ define([
                     labelAttr: 'label',
                     mayHaveChildren: function(item) {
                         //items of type 'item' never have children.
-                        return (item.type != 'item');
+                        return (item.type !== 'item');
                     }
                 });
 
@@ -275,7 +275,7 @@ define([
             showResults: function(resultCollection) {
                 //console.log('inside showResults...');
                 var screenPt;
-                if (this.map.spatialReference.isWebMercator() && resultCollection.anchorPoint.spatialReference.wkid == 4326) {
+                if (this.map.spatialReference.isWebMercator() && resultCollection.anchorPoint.spatialReference.wkid === 4326) {
                     screenPt = screenUtils.toScreenGeometry(this.map.extent, this.map.width, this.map.height,
                         webMercatorUtils.geographicToWebMercator(resultCollection.anchorPoint));
                 }
@@ -311,41 +311,45 @@ define([
                 var numFeatures = 0;
 
                 for (var svcName in results) {
-                    for (var layerName in results[svcName]) {
+                    if (results.hasOwnProperty(svcName)) {
+                        for (var layerName in results[svcName]) {
+                            if (results[svcName].hasOwnProperty(layerName)) {
 
-                        numFeatures += results[svcName][layerName].length;
+                                numFeatures += results[svcName][layerName].length;
 
-                        for (var i = 0; i < results[svcName][layerName].length; i++) {
-                            var item = results[svcName][layerName][i];
-                            var layerKey = svcName + '/' + layerName;
-                            var layerUrl = results[svcName][layerName][i].layerUrl;
-                            var layerType = results[svcName][layerName][j].layerType;
+                                for (var i = 0; i < results[svcName][layerName].length; i++) {
+                                    var item = results[svcName][layerName][i];
+                                    var layerKey = svcName + '/' + layerName;
+                                    var layerUrl = results[svcName][layerName][i].layerUrl;
+                                    var layerType = results[svcName][layerName][i].layerType;
 
-                            //Create a layer "folder" node if it doesn't already exist
-                            if (this.featureStore.query({name: layerName}).length === 0) {
-                                this.featureStore.put({
-                                    uid: ++this.uid,
-                                    id: layerName,
-                                    label: this.getLayerDisplayLabel(item),
-                                    type: 'folder',
-                                    parent: 'root'
-                                });
+                                    //Create a layer "folder" node if it doesn't already exist
+                                    if (this.featureStore.query({name: layerName}).length === 0) {
+                                        this.featureStore.put({
+                                            uid: ++this.uid,
+                                            id: layerName,
+                                            label: this.getLayerDisplayLabel(item),
+                                            type: 'folder',
+                                            parent: 'root'
+                                        });
+                                    }
+
+                                    //Add the current item to the store, with the layerName as parent
+                                    this.featureStore.put({
+                                        uid: ++this.uid,
+                                        id: this.uid,
+                                        //TODO: make sure magnifying glass DOM id property is unique
+                                        displayLabel: this.getItemDisplayLabel(item),
+                                        label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
+                                        layerUrl: layerUrl,
+                                        layerKey: layerKey,
+                                        layerType: layerType,
+                                        attributes: item.feature.attributes,
+                                        parent: layerName,
+                                        type: 'item'
+                                    });
+                                }
                             }
-
-                            //Add the current item to the store, with the layerName as parent
-                            this.featureStore.put({
-                                uid: ++this.uid,
-                                id: this.uid,
-                                //TODO: make sure magnifying glass DOM id property is unique
-                                displayLabel: this.getItemDisplayLabel(item),
-                                label: this.getItemDisplayLabel(item) + " <a id='zoom-" + this.uid + "' href='#' class='zoomto-link'><img src=config.app.ngdcDijitsUrl+'/identify/images/magnifying-glass.png'></a>",
-                                layerUrl: layerUrl,
-                                layerKey: layerKey,
-                                layerType: layerType,
-                                attributes: item.feature.attributes,
-                                parent: layerName,
-                                type: 'item'
-                            });
                         }
                     }
                 }
@@ -364,10 +368,10 @@ define([
                         this.showInfo(item);
                     }),
                     getIconClass: function(item, opened) {
-                        if (item.type == 'item') {
+                        if (item.type === 'item') {
                             return 'iconBlank';
                         }
-                        else if (item.type == 'folder') {
+                        else if (item.type === 'folder') {
                             return (opened ? 'dijitFolderOpened' : 'dijitFolderClosed');
                         }
                         else {
@@ -406,7 +410,7 @@ define([
                 //Remove all items except for the root
                 var allItems = this.featureStore.query();
                 array.forEach(allItems, lang.hitch(this, function(item) {
-                    if (item.id != 'root') {
+                    if (item.id !== 'root') {
                         this.featureStore.remove(item.id);
                     }
                 }));
@@ -454,12 +458,12 @@ define([
                     });
                 }
 
-                if (item && item.type == 'item') {
+                if (item && item.type === 'item') {
 
                     //Style the label in blue with underline
                     this.styleItemAsLink(item.uid);
 
-                    if (this.highlightItem && item.uid == this.highlightItem.uid) {
+                    if (this.highlightItem && item.uid === this.highlightItem.uid) {
                         //skip if current item already highlighted
                         return;
                     }
@@ -492,7 +496,7 @@ define([
             queryForHighlightGeometry: function(item) {
                 //Query the map service for one feature's geometry
                 //console.log("inside mouseOverQuery...");
-                if (this.highlightItem && item.uid == this.highlightItem.uid) {
+                if (this.highlightItem && item.uid === this.highlightItem.uid) {
                     //skip if current item already highlighted
                     return;
                 }
@@ -568,8 +572,9 @@ define([
                                 var newPoints = [];
                                 for (var i = 0; i < path.length; i++) {
                                     var x = path[i][0] - worldWidth/2;
-                                    if (x < -worldWidth/2)
+                                    if (x < -worldWidth/2) {
                                         x += worldWidth;
+                                    }
                                     newPoints[i] = new Point(x, path[i][1], outSR);
                                 }
                                 newGeom.addPath(newPoints);
@@ -581,8 +586,9 @@ define([
                                 var newPoints = [];
                                 for (var i = 0; i < ring.length; i++) {
                                     var x = ring[i][0] - worldWidth/2;
-                                    if (x < -worldWidth/2)
+                                    if (x < -worldWidth/2) {
                                         x += worldWidth;
+                                    }
                                     newPoints[i] = new Point(x, ring[i][1], outSR);
                                 }
                                 newGeom.addRing(newPoints);
@@ -592,8 +598,9 @@ define([
                             newGeom = new Multipoint(outSR);
                             array.forEach(geometry.points, function(point){
                                 var x = point - worldWidth/2;
-                                if (x < -worldWidth/2)
+                                if (x < -worldWidth/2) {
                                     x += worldWidth;
+                                }
                                 newGeom.addPoint(new Point(x, point[1], outSR));
                             }, this);
                         }
