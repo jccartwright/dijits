@@ -101,8 +101,12 @@ define({
 
 	// Non-functional test suite(s) to run in each browser
 	suites: [
+// wildcards only work w/ Intern proxy
+//        'tests/unit/*'
 	'tests/unit/hello',
-	'tests/unit/extent'
+	'tests/unit/extent',
+    'tests/unit/tasks/WMSIdentifyParameters',
+    'tests/unit/tasks/WMSIdentifyTask'
 	 /* 'myPackage/tests/foo', 'myPackage/tests/bar' */ ],
 
 	// Functional test suite(s) to execute against each browser once non-functional tests are completed
