@@ -25,8 +25,8 @@ define([
                 this.transparent = arguments[1].transparent || 'TRUE';
                 this.format = arguments[1].format || 'jpeg';
                 this.srsOrCrs = 'SRS';
-                if (this.wmsVersion == '1.3.0') {
-                    this.srsOrCrs = 'CRS'
+                if (this.wmsVersion === '1.3.0') {
+                    this.srsOrCrs = 'CRS';
                 }
                 this.epsgCode = arguments[1].epsgCode || '3857';
                 this.sld = arguments[1].sld;

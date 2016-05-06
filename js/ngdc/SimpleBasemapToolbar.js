@@ -18,7 +18,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
             layerCollection: null,
 
             //constructor for parent called before constructor of child class
-            constructor: function(arguments) {
+            constructor: function() {
                 this.layerCollection = arguments.layerCollection;
                 this.map = arguments.map;
             },
@@ -26,7 +26,7 @@ define(["dojo/_base/declare","dijit/_WidgetBase", "dijit/_TemplatedMixin", "diji
             showBasemap: function(selectedIndex) {
                 //only one basemap showing at a time
                 array.forEach(this._basemaps, function(basemap, idx) {
-                    if (selectedIndex == idx) {
+                    if (selectedIndex === idx) {
                         array.forEach(basemap.services, function(targetId){
                             this.layerCollection.getLayerById(targetId).setVisibility(true);
                             this.basemapMenu.getChildren()[idx].containerNode.style.fontWeight = "bold";

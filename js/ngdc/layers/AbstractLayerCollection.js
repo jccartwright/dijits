@@ -136,7 +136,7 @@ define([
                         idx.push(i);
                     }
                 }, this);
-                if (idx.length != 2) {
+                if (idx.length !== 2) {
                     logger.warn('There should only be two elements in this array');
                 }
                 idx.sort();
@@ -216,7 +216,7 @@ define([
                         }
 
                         var array = this.setToArray(set);
-                        if (array.length == 1 && array[0] == -1) {
+                        if (array.length === 1 && array[0] === -1) {
                             //if visible layers is [-1], hide the service
                             svc.hide();
                             svc.setVisibleLayers(this.setToArray(set));

@@ -41,10 +41,8 @@ define([
                     this.dataUrl = '';
                 }
 
-                if (this.image !== null && this.image.slice(0, 4) === 'http') {
-                    //absolute URL - use as is
-                } else {
-                    //relative to page
+                if (this.image && this.image.slice(0, 4) !== 'http') {
+                    //image URL is relative to page
                     var img = this.image;
                     if (!this.image) {
                         img = 'images/mapservice.gif';
