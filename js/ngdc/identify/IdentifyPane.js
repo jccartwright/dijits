@@ -505,7 +505,13 @@ define([
 
                 var queryTask = new QueryTask(item.layerUrl);
                 var query = new Query();
-                query.where = 'OBJECTID = ' + item.attributes['OBJECTID'];
+
+                //If a custom objectId field name is specified, use it, otherwise query on OBJECTID.
+                if (item.objectIdField) {
+                    query.objectIds = [item.attributes[item.objectIdField]];
+                } else {
+                    query.objectIds = [item.attributes['OBJECTID']];
+                }
                 query.outSpatialReference = this.map.spatialReference;
                 query.returnGeometry = true;
                 query.maxAllowableOffset = 100; //simpify a bit for performance. TODO: set based on current map scale?
