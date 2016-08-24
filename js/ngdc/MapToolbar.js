@@ -15,6 +15,7 @@ define([
     'esri/symbols/SimpleFillSymbol', 
     'esri/symbols/SimpleLineSymbol', 
     'esri/geometry/Polygon',
+    'esri/geometry/Polyline',
     'esri/geometry/geometryEngine',
     'dojo/_base/Color',
     'dijit/form/DropDownButton', 
@@ -47,6 +48,7 @@ define([
         SimpleFillSymbol, 
         SimpleLineSymbol,
         Polygon,
+        Polyline,
         geometryEngine,
         Color,
         DropDownButton, 
@@ -168,6 +170,11 @@ define([
                 }));
 
                 this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
+
+                //For polar projections, calculate the "cutter" polylines that will be used to split antimeridian-crossing polygons for the identify.
+                if (!this.map.spatialReference.isWebMercator()) {
+                    this._getCutterPolylines();
+                }
             },
 
             showBasemap: function(selectedIndex) {
@@ -369,14 +376,10 @@ define([
                 if (this.map.spatialReference.isWebMercator()) {
                     topic.publish('/ngdc/geometry', geometry);
                 }
-                //In other projections, only a polygon (not extent) works with the ArcGIS REST identify, if it crosses the antimeridian. 
-                //Convert any extent to a polygon, then publish to the identify.
+                //In other (Polar) projections, need to split the geometry into 2 parts on either side of the antimeridian/prime meridian.
+                //Perform the cut and publish to the identify.
                 else {
-                    var polygon = geometry;
-                    if (geometry.type === 'extent') {
-                        polygon = Polygon.fromExtent(geometry); //Create a polygon from the extent
-                    }
-                    topic.publish('/ngdc/geometry', polygon);
+                    this._cutPolarGeometryAndIdentify(geometry);
                 }
                 
                 //only allow one shape to be drawn
@@ -384,6 +387,59 @@ define([
                 this.map.showZoomSlider();
                 this.clickHandler.resume(); //Resume map click events if they were paused
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
+            },
+
+            //Cuts the polygon using a line that is defined by the antimeridian/prime meridian, and publishes the resulting multipolygon to the identify when complete.
+            //This should work for any polar projection.
+            _cutPolarGeometryAndIdentify: function(geometry) {
+                var polygon = geometry;
+                if (geometry.type === 'extent') {
+                    polygon = Polygon.fromExtent(geometry); //Create a polygon in case the geometry is an extent
+                }
+
+                //Check if the polygon crosses one of the cutter polylines.
+                if (this.cutterPolylineNorth && this.cutterPolylineSouth && 
+                    (geometryEngine.crosses(polygon, this.cutterPolylineNorth) || geometryEngine.crosses(polygon, this.cutterPolylineSouth)) ) {
+
+                    //Cut the polygon, using either the north or south cutter. Normally results in an array of 2 polygons: first left then right.
+                    var cutPolygons;
+                    if (geometryEngine.crosses(polygon, this.cutterPolylineNorth)) {
+                        cutPolygons = geometryEngine.cut(polygon, this.cutterPolylineNorth);
+                    } else {
+                        cutPolygons = geometryEngine.cut(polygon, this.cutterPolylineSouth);
+                    }
+
+                    //Build a multipolygon from the 2 polygons created above.
+                    var multipolygon = new Polygon(this.map.spatialReference);
+                    array.forEach(cutPolygons, function(polygon) {
+                        array.forEach(polygon.rings, function(ring) {
+                            multipolygon.addRing(ring);
+                        });
+                    });
+
+                    //Make sure the polygon's X coordinates don't exacctly touch 0. This can cause problems (incorrect results may be returned).
+                    polygon = this._moveVerticesOffZero(multipolygon);
+                }
+
+                topic.publish('/ngdc/geometry', polygon); //Publish the geometry to the identify
+            },
+
+            //Shift the X coordinates of the multipolygon so that they are slightly away from zero.
+            //Assumes the left-most polygon is first, and the right one second.
+            _moveVerticesOffZero: function(multipolygon) {
+                if (multipolygon.rings.length > 1) {
+                    array.forEach(multipolygon.rings[0], function(vertex) {
+                        if (Math.abs(vertex[0]) < 0.01) {
+                            vertex[0] = -0.01;
+                        }
+                    });
+                    array.forEach(multipolygon.rings[1], function(vertex) {
+                        if (Math.abs(vertex[0]) < 0.01) {
+                            vertex[0] = 0.01;
+                        }
+                    });
+                }
+                return multipolygon;
             },
 
             //For polar projections, take a geographic extent and densify it, then project it to the local coordinate system. 
@@ -409,6 +465,24 @@ define([
                     logger.error(error);
                 });
 
+            },
+
+            _getCutterPolylines: function() {
+                //Define two "cutter" polylines, consisting of the prime meridian/antimeridian for the northern and southern hemispheres.
+                var cutterNorth = new Polyline([[180, 0], [180, 90], [0, 0]]);
+                var cutterSouth = new Polyline([[180, 0], [180, -90], [0, 0]]);
+
+                //Project the cutter polylines into the map's coordinate system. Needs to use asychronous GeometryService for now.
+                var projectParams = new ProjectParameters();
+                projectParams.geometries = [cutterNorth, cutterSouth];
+                projectParams.outSR = this.map.spatialReference;
+                projectParams.transformForward = true;
+                this.geometryService.project(projectParams, lang.hitch(this, function(polylines) {
+                    this.cutterPolylineNorth = polylines[0];
+                    this.cutterPolylineSouth = polylines[1];
+                }), function(error) {
+                    logger.error(error);
+                });
             },
 
             geometryToGeographic: function(geometry) {
