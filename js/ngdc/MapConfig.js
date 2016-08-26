@@ -223,7 +223,7 @@ define([
 
             getDepth: function (geoPoint) {
                 request({
-                    url: '//gis.ngdc.noaa.gov/arcgis/rest/services/DEM_SeaLevel/ImageServer/identify',
+                    url: '//gis.ngdc.noaa.gov/arcgis/rest/services/DEM_global_mosaic/ImageServer/identify',
                     content: {
                         geometry: geoPoint.x+','+geoPoint.y,
                         geometryType:'esriGeometryPoint',
