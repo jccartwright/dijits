@@ -171,9 +171,9 @@ define([
 
                 this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
-                //For polar projections, calculate the "cutter" polylines that will be used to split antimeridian-crossing polygons for the identify.
+                //For polar projections, calculate the "cutter" polygons that will be used to split antimeridian-crossing polygons for the identify.
                 if (!this.map.spatialReference.isWebMercator()) {
-                    this._getCutterPolylines();
+                    this._getCutterPolygons();
                 }
             },
 
@@ -398,48 +398,22 @@ define([
                 }
 
                 //Check if the polygon crosses one of the cutter polylines.
-                if (this.cutterPolylineNorth && this.cutterPolylineSouth && 
-                    (geometryEngine.crosses(polygon, this.cutterPolylineNorth) || geometryEngine.crosses(polygon, this.cutterPolylineSouth)) ) {
+                if (this.cutterPolygonNorth && this.cutterPolygonSouth && 
+                    (geometryEngine.crosses(polygon, this.cutterPolygonNorth) || geometryEngine.crosses(polygon, this.cutterPolygonSouth)) ) {
 
-                    //Cut the polygon, using either the north or south cutter. Normally results in an array of 2 polygons: first left then right.
-                    var cutPolygons;
-                    if (geometryEngine.crosses(polygon, this.cutterPolylineNorth)) {
-                        cutPolygons = geometryEngine.cut(polygon, this.cutterPolylineNorth);
+                    //Cut the polygon using the geometryEngine 'difference' operation, using either the north or south cutter. Results in a multipolygon.
+                    var multipolygon;
+                    if (geometryEngine.crosses(polygon, this.cutterPolygonNorth)) {
+                        multipolygon = geometryEngine.difference(polygon, this.cutterPolygonNorth);
                     } else {
-                        cutPolygons = geometryEngine.cut(polygon, this.cutterPolylineSouth);
+                        multipolygon = geometryEngine.difference(polygon, this.cutterPolygonSouth);
                     }
 
-                    //Build a multipolygon from the 2 polygons created above.
-                    var multipolygon = new Polygon(this.map.spatialReference);
-                    array.forEach(cutPolygons, function(polygon) {
-                        array.forEach(polygon.rings, function(ring) {
-                            multipolygon.addRing(ring);
-                        });
-                    });
 
-                    //Make sure the polygon's X coordinates don't exacctly touch 0. This can cause problems (incorrect results may be returned).
-                    polygon = this._moveVerticesOffZero(multipolygon);
+                    polygon = multipolygon;
                 }
 
                 topic.publish('/ngdc/geometry', polygon); //Publish the geometry to the identify
-            },
-
-            //Shift the X coordinates of the multipolygon so that they are slightly away from zero.
-            //Assumes the left-most polygon is first, and the right one second.
-            _moveVerticesOffZero: function(multipolygon) {
-                if (multipolygon.rings.length > 1) {
-                    array.forEach(multipolygon.rings[0], function(vertex) {
-                        if (Math.abs(vertex[0]) < 0.01) {
-                            vertex[0] = -0.01;
-                        }
-                    });
-                    array.forEach(multipolygon.rings[1], function(vertex) {
-                        if (Math.abs(vertex[0]) < 0.01) {
-                            vertex[0] = 0.01;
-                        }
-                    });
-                }
-                return multipolygon;
             },
 
             //For polar projections, take a geographic extent and densify it, then project it to the local coordinate system. 
@@ -467,7 +441,7 @@ define([
 
             },
 
-            _getCutterPolylines: function() {
+            _getCutterPolygons: function() {
                 //Define two "cutter" polylines, consisting of the prime meridian/antimeridian for the northern and southern hemispheres.
                 var cutterNorth = new Polyline([[180, 0], [180, 90], [0, 0]]);
                 var cutterSouth = new Polyline([[180, 0], [180, -90], [0, 0]]);
@@ -478,11 +452,14 @@ define([
                 projectParams.outSR = this.map.spatialReference;
                 projectParams.transformForward = true;
                 this.geometryService.project(projectParams, lang.hitch(this, function(polylines) {
-                    this.cutterPolylineNorth = polylines[0];
-                    this.cutterPolylineSouth = polylines[1];
+                    //Create a 1 meter buffer around each polyline. The resulting polygon will later be used to split the geometry.
+                    //This is to prevent either polygon part from exactly touching the prime/antimeridian, which can cause problems (zero results).
+                    var buffers = geometryEngine.buffer(polylines, [1]);
+                    this.cutterPolygonNorth = buffers[0];
+                    this.cutterPolygonSouth = buffers[1];
                 }), function(error) {
                     logger.error(error);
-                });
+                });    
             },
 
             geometryToGeographic: function(geometry) {
