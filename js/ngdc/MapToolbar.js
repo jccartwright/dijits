@@ -397,13 +397,13 @@ define([
                     polygon = Polygon.fromExtent(geometry); //Create a polygon in case the geometry is an extent
                 }
 
-                //Check if the polygon crosses one of the cutter polylines.
+                //Check if the polygon intersects one of the cutter polylines.
                 if (this.cutterPolygonNorth && this.cutterPolygonSouth && 
-                    (geometryEngine.crosses(polygon, this.cutterPolygonNorth) || geometryEngine.crosses(polygon, this.cutterPolygonSouth)) ) {
+                    (geometryEngine.intersects(polygon, this.cutterPolygonNorth) || geometryEngine.intersects(polygon, this.cutterPolygonSouth)) ) {
 
                     //Cut the polygon using the geometryEngine 'difference' operation, using either the north or south cutter. Results in a multipolygon.
                     var multipolygon;
-                    if (geometryEngine.crosses(polygon, this.cutterPolygonNorth)) {
+                    if (geometryEngine.intersects(polygon, this.cutterPolygonNorth)) {
                         multipolygon = geometryEngine.difference(polygon, this.cutterPolygonNorth);
                     } else {
                         multipolygon = geometryEngine.difference(polygon, this.cutterPolygonSouth);
