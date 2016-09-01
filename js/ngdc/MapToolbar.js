@@ -25,6 +25,7 @@ define([
     'dijit/CheckedMenuItem',
     'ngdc/BoundingBoxDialog', 
     'esri/graphic', 
+    'esri/SpatialReference',
     'esri/toolbars/draw', 
     'dojo/topic',
     'dojo/_base/connect', 
@@ -58,6 +59,7 @@ define([
         CheckedMenuItem,
         BoundingBoxDialog, 
         Graphic, 
+        SpatialReference,
         Draw, 
         topic,
         Connect, 
@@ -158,23 +160,11 @@ define([
                 topic.subscribe('/ngdc/BoundingBoxDialog/extent', lang.hitch(this, function(extent) {
                     if (this.enabled) {
                         //BoundingBoxDialog passed an extent. Add to map, execute identify, and zoom to the extent.
-                        if (this.map.spatialReference.isWebMercator()) {
-                            //If in Web Mercator, pass the extent as-is.
-                            this._addAreaOfInterestToMapAndIdentify(extent, true);
-                        }
-                        else {
-                            //In polar coordinates, need to densify and project the geometry first.
-                            this._densifyAndProjectExtentAndIdentify(extent);
-                        }
+                        this._addAreaOfInterestToMapAndIdentify(extent, true);                        
                     }
                 }));
 
                 this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
-
-                //For polar projections, calculate the "cutter" polygons that will be used to split antimeridian-crossing polygons for the identify.
-                if (!this.map.spatialReference.isWebMercator()) {
-                    this._getCutterPolygons();
-                }
             },
 
             showBasemap: function(selectedIndex) {
@@ -364,22 +354,26 @@ define([
             },            
 
             //Add the extent/polygon to the map and publish to the identify dijit.
-            //Attached to onDrawEnd event when drawing geometry. Also called from _densifyAndProjectExtentAndIdentify().
-            _addAreaOfInterestToMapAndIdentify: function(/*Geometry*/ geometry, /*boolean*/ zoomToExtent) {
-                this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
-                this.map.graphics.add(this.map.identifyGraphic);
-                if (zoomToExtent) {
-                    this.map.setExtent(geometry, true);
+            //Attached to onDrawEnd event when drawing geometry. Also called when BoundingBoxDialog completes.
+            _addAreaOfInterestToMapAndIdentify: function(/*Extent or Polygon*/ geometry, /*boolean*/ zoomToExtent) {
+                
+                //Add the graphic representing the geometry to the map
+                if (geometry.spatialReference.equals(this.map.spatialReference) || this.map.spatialReference.isWebMercator()) {
+                    //If the geometry's spatial reference matches the map's, add it directly
+                    this._addGeometryToMap(geometry, zoomToExtent);
+                } else {
+                    //Else, densify and project the geometry to the map's spatial reference, then add to map.
+                    this._projectGeometryAndAddToMap(geometry, zoomToExtent);
                 }
-
-                //If in Web Mercator, add the graphic to the map and publish to the identify. Works with any extents or polygons, even crossing antimeridian.
-                if (this.map.spatialReference.isWebMercator()) {
-                    topic.publish('/ngdc/geometry', geometry);
+                
+                //If the geometry is in Web Mercator or geographic, publish the geometry to the identify. Works with any extents or polygons, even crossing antimeridian.
+                //Densify the polygon for more consistent results (minimizes geometries found outside the area of interest).
+                if (geometry.spatialReference.isWebMercator() || geometry.spatialReference.wkid === 4326) {
+                    this._publishGeometryToIdentify(geometry, true);
                 }
-                //In other (Polar) projections, need to split the geometry into 2 parts on either side of the antimeridian/prime meridian.
-                //Perform the cut and publish to the identify.
+                //In other (i.e. Polar) projections, need to densify the geometry and project to geographic before identifying.
                 else {
-                    this._cutPolarGeometryAndIdentify(geometry);
+                    this._projectGeometryToGeographicAndIdentify(geometry);
                 }
                 
                 //only allow one shape to be drawn
@@ -389,82 +383,81 @@ define([
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
             },
 
-            //Cuts the polygon using a line that is defined by the antimeridian/prime meridian, and publishes the resulting multipolygon to the identify when complete.
-            //This should work for any polar projection.
-            _cutPolarGeometryAndIdentify: function(geometry) {
+            _addGeometryToMap(/*Extent or Polygon*/ geometry, zoomToExtent) {
+                this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
+                this.map.graphics.add(this.map.identifyGraphic);
+                if (zoomToExtent) {
+                    this.map.setExtent(geometry, true);
+                }
+            },
+
+            _projectGeometryAndAddToMap: function(/*Extent or Polygon*/ geometry, zoomToExtent) {
                 var polygon = geometry;
                 if (geometry.type === 'extent') {
                     polygon = Polygon.fromExtent(geometry); //Create a polygon in case the geometry is an extent
                 }
 
-                //Check if the polygon intersects one of the cutter polylines.
-                if (this.cutterPolygonNorth && this.cutterPolygonSouth && 
-                    (geometryEngine.intersects(polygon, this.cutterPolygonNorth) || geometryEngine.intersects(polygon, this.cutterPolygonSouth)) ) {
+                //Densify the polygon to approximately 80 vertices
+                polygon = this._densifyPolygon(polygon, 80);
 
-                    //Cut the polygon using the geometryEngine 'difference' operation, using either the north or south cutter. Results in a multipolygon.
-                    var multipolygon;
-                    if (geometryEngine.intersects(polygon, this.cutterPolygonNorth)) {
-                        multipolygon = geometryEngine.difference(polygon, this.cutterPolygonNorth);
-                    } else {
-                        multipolygon = geometryEngine.difference(polygon, this.cutterPolygonSouth);
-                    }
-
-
-                    polygon = multipolygon;
-                }
-
-                topic.publish('/ngdc/geometry', polygon); //Publish the geometry to the identify
-            },
-
-            //For polar projections, take a geographic extent and densify it, then project it to the local coordinate system. 
-            //Continue by adding it to the map and identifying.
-            //Called when returning from the BoundingBoxDialog.
-            _densifyAndProjectExtentAndIdentify: function(/*Extent*/ extent) {
                 var projectParams = new ProjectParameters();
-                var polygon = Polygon.fromExtent(extent); //Create a polygon from the extent
-
-                //Set the densify max segment length to be 1/20th of the width of the extent in degrees
-                var extentWidth = Math.abs(extent.xmax - extent.xmin);
-                var maxSegmentLength = extentWidth / 20;
-                var densifiedPolygon = geometryEngine.densify(polygon, maxSegmentLength);
-
-                projectParams.geometries = [densifiedPolygon];
+                projectParams.geometries = [polygon];
                 projectParams.outSR = this.map.spatialReference;
                 projectParams.transformForward = true;
 
-                //Project the densififed geometry
-                this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {                            
-                    this._addAreaOfInterestToMapAndIdentify(geometries[0], true);
+                //Project the densififed geometry to the map's coordinate system and add graphic to map
+                this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {    
+                    this._addGeometryToMap(geometries[0], zoomToExtent);
                 }), function(error) {
                     logger.error(error);
                 });
-
             },
 
-            _getCutterPolygons: function() {
-                //Define two "cutter" polylines, consisting of the prime meridian/antimeridian for the northern and southern hemispheres.
-                var cutterNorth = new Polyline([[180, 0], [180, 90], [0, 0]]);
-                var cutterSouth = new Polyline([[180, 0], [180, -90], [0, 0]]);
+            _projectGeometryToGeographicAndIdentify: function(/*Extent or Polygon*/ geometry) {
+                var polygon = geometry;
+                if (geometry.type === 'extent') {
+                    polygon = Polygon.fromExtent(geometry); //Create a polygon in case the geometry is an extent
+                }
 
-                //Project the cutter polylines into the map's coordinate system. Needs to use asychronous GeometryService for now.
+                //Densify the polygon to approximately 80 vertices
+                polygon = this._densifyPolygon(polygon, 80);
+
                 var projectParams = new ProjectParameters();
-                projectParams.geometries = [cutterNorth, cutterSouth];
-                projectParams.outSR = this.map.spatialReference;
+                projectParams.geometries = [densifiedPolygon];
+                projectParams.outSR = new SpatialReference(4326);
                 projectParams.transformForward = true;
-                this.geometryService.project(projectParams, lang.hitch(this, function(polylines) {
-                    //Create a 1 meter buffer around each polyline. The resulting polygon will later be used to split the geometry.
-                    //This is to prevent either polygon part from exactly touching the prime/antimeridian, which can cause problems (zero results).
-                    var buffers = geometryEngine.buffer(polylines, [1]);
-                    this.cutterPolygonNorth = buffers[0];
-                    this.cutterPolygonSouth = buffers[1];
+
+                //Project the densififed geometry to geographic and publish to the identify
+                this.geometryService.project(projectParams, lang.hitch(this, function(geometries) {  
+                    this._publishGeometryToIdentify(geometries[0], false);
                 }), function(error) {
                     logger.error(error);
-                });    
+                });
             },
 
-            geometryToGeographic: function(geometry) {
-                //already in geographic - no conversion necessary
-                return(geometry);
+            _densifyPolygon: function(polygon, numVertices) {
+                //Densify the polygon to approximately numVertices
+                var perimeter = geometryEngine.planarLength(polygon);
+                return geometryEngine.densify(polygon, perimeter / numVertices);
+            },
+
+            _publishGeometryToIdentify: function(/*Extent or Polygon*/ geometry, /*boolean*/ densify) {
+                var polygon = geometry;
+                if (geometry.type === 'extent') {
+                    polygon = Polygon.fromExtent(geometry); //Create a polygon in case the geometry is an extent
+                }
+
+                if (densify) {
+                    //Densify the polygon to approximately 80 vertices
+                    polygon = this._densifyPolygon(polygon, 80);
+                }
+
+                //Check for self-intersection and fix if necessary
+                if (polygon.isSelfIntersecting(polygon)) {
+                    polygon = geometryEngine.simplify(polygon);
+                }
+
+                topic.publish('/ngdc/geometry', polygon); //Publish to the identify
             }
         });
     }
