@@ -423,7 +423,7 @@ define([
                 polygon = this._densifyPolygon(polygon, 80);
 
                 var projectParams = new ProjectParameters();
-                projectParams.geometries = [densifiedPolygon];
+                projectParams.geometries = [polygon];
                 projectParams.outSR = new SpatialReference(4326);
                 projectParams.transformForward = true;
 
