@@ -285,6 +285,13 @@ define([
                 screenPt.x += this.map.position.x;
                 screenPt.y += this.map.position.y;
 
+                //In case the calculated screenPt is off the edge of the screen, just put the pane in the center of the screen.
+                //This can happen when the BoundingBoxDialog is used to define an area off-screen.
+                if (screenPt.x < 0 || screenPt.y < 0 || screenPt.x > window.outerWidth || screenPt.y > window.outerHeight) {
+                    screenPt.x = window.outerWidth / 2;
+                    screenPt.y = window.outerHeight / 2;
+                }
+
                 this.removeHighlightGraphic();
 
                 this.showFeaturePage();
