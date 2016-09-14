@@ -383,7 +383,7 @@ define([
                 domClass.replace('identifyIcon', 'identifyByPointIcon', ['identifyByPolygonIcon', 'identifyByRectIcon', 'identifyByCoordsIcon']);
             },
 
-            _addGeometryToMap(/*Extent or Polygon*/ geometry, zoomToExtent) {
+            _addGeometryToMap: function(/*Extent or Polygon*/ geometry, zoomToExtent) {
                 this.map.identifyGraphic = new Graphic(geometry, this.aoiSymbol);
                 this.map.graphics.add(this.map.identifyGraphic);
                 if (zoomToExtent) {
