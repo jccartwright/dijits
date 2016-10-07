@@ -203,7 +203,11 @@ define([
                     style: 'bottom: 5px; left: 5px;',
                     onClick: lang.hitch(this, function(){
                         this.setTitle(this.featurePageTitle);
-                        this.stackContainer.back();
+
+                        //Put the back() call on very short timer. This seems to solve the "blank page" problem when hitting the back button.
+                        setTimeout(lang.hitch(this, function() {
+                            this.stackContainer.back();
+                        }), 10);                        
                     })
                 }).placeAt(this.infoPageBottomBar);
 
