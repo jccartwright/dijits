@@ -74,8 +74,13 @@ define([
             initialize: function () {
                 //inherit properties from the DynamicMapService
                 this.url = this._dynamicService.url;
-                this.maxRecordCount = this._dynamicService.maxRecordCount;                
-                this.layerDefinitions = this._dynamicService.layerDefinitions;
+                
+                this.maxRecordCount = this._dynamicService.maxRecordCount;
+
+                //Only applies to ArcGISDynamicMapServiceLayer
+                if (this._dynamicService.hasOwnProperty('layerDefinitions')) {
+                    this.layerDefinitions = this._dynamicService.layerDefinitions;
+                }
 
                 this.setOpacity(this.opacity);
 
@@ -86,25 +91,35 @@ define([
                 }
 
                 //build list of layer ids visible by default, if not already set in the constructor
-                if (this._defaultVisibleLayers.length === 0) {
-                    array.forEach(this._dynamicService.layerInfos, function (layerInfo) {
-                        if (layerInfo.defaultVisibility) {
-                            this._defaultVisibleLayers.push(layerInfo.id);
-                        }
-                    }, this);
-                } else {
-                    //if defaultVisibleLayers set in the constructor, set the visibleLayers on the dynamic service
-                    this._dynamicService.setVisibleLayers(this._defaultVisibleLayers);                    
+                if (this._dynamicService.hasOwnProperty('layerInfos')) { //Only applies to ArcGISDynamicMapServiceLayer
+                    if (this._defaultVisibleLayers.length === 0) {
+                        array.forEach(this._dynamicService.layerInfos, function (layerInfo) {
+                            if (layerInfo.defaultVisibility) {
+                                this._defaultVisibleLayers.push(layerInfo.id);
+                            }
+                        }, this);
+                    } else {
+                        //if defaultVisibleLayers set in the constructor, set the visibleLayers on the dynamic service
+                        this._dynamicService.setVisibleLayers(this._defaultVisibleLayers);                    
+                    }
                 }
-
                 //inherit visibleLayers from the dynamic service
-                this.visibleLayers = this._dynamicService.visibleLayers;
+                if (this._dynamicService.hasOwnProperty('visibleLayers')) {
+                    this.visibleLayers = this._dynamicService.visibleLayers; //Only applies to ArcGISDynamicMapServiceLayer
+                } else {
+                    //For ArcGISImageServiceLayer, set "layer 0" to be the visible layer
+                    this.visibleLayers = [0];
+                    this._defaultVisibleLayers = [0];
+                }
 
                 //set the initial active layer
                 this._toggleService();
             },
 
             setVisibleLayers: function(ids){
+                if (!this._dynamicService.hasOwnProperty('visibleLayers')) {
+                    return; //For ArcGISImageServiceLayer, immediately return.
+                }
                 logger.debug('setting visibleLayers to ', ids);
 
                 if (ids === null) {
@@ -122,9 +137,6 @@ define([
             },
 
             setLayerDefinitions: function(layerDefinitions){
-                //console.log('setting layerDefinitions to ', layerDefinitions);
-                //console.log(this._map.getLevel());
-
                 //checks for both undefined and null via coercion
                 if (layerDefinitions === null) {
                     logger.error('layerDefinitions cannot be null');
@@ -135,15 +147,30 @@ define([
                     this.layerDefinitions = [];
                 }
                 if (layerDefinitions.length > 0) { //Prevent an unnecessary dynamic image export when setting layerDefs to default
-                    this._dynamicService.setLayerDefinitions(layerDefinitions);
+                    if (this._dynamicService.setLayerDefinitions) {
+                        //Call setLayerDefinitions() for ArcGISDynamicMapServiceLayers
+                        this._dynamicService.setLayerDefinitions(layerDefinitions);
+                    }
+                    else if (this._dynamicService.setDefinitionExpression) {
+                        //Call setDefinitionExpression() for ArcGISImageServiceLayers
+                        this._dynamicService.setDefinitionExpression(layerDefinitions[0], false);
+                    }
+
                     //store in public property
-                    this.layerDefinitions = this._dynamicService.layerDefinitions;
+                    this.layerDefinitions = layerDefinitions;
                 }
 
                 this._toggleService();
 
                 if (layerDefinitions.length === 0) {
-                    this._dynamicService.setLayerDefinitions([]);
+                    if (this._dynamicService.setLayerDefinitions) {
+                        //Call setLayerDefinitions() for ArcGISDynamicMapServiceLayers
+                        this._dynamicService.setLayerDefinitions([]);
+                    }
+                    else if (this._dynamicService.setDefinitionExpression) {
+                        //Call setDefinitionExpression() for ArcGISImageServiceLayers
+                        this._dynamicService.setDefinitionExpression('', false);
+                    }
                 }
             },
 
