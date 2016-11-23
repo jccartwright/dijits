@@ -164,7 +164,7 @@ define([
                     }
                 }));
 
-                this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
+                this.geometryService = new GeometryService('https://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
             },
 
             showBasemap: function(selectedIndex) {
