@@ -82,7 +82,7 @@ define([
                 var jsonString = JSON.stringify(formContents);
 
                 xhr.post(
-                    '//maps.ngdc.noaa.gov/mapviewer-support/feedback/feedbackHandler.groovy', {
+                    'https://maps.ngdc.noaa.gov/mapviewer-support/feedback/feedbackHandler.groovy', {
                         data: jsonString,
                         handleAs: 'json',
                         headers: {'Content-Type':'application/json'},

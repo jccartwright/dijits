@@ -14,7 +14,7 @@
 }
 
 .tundra .dojoxFloatingPaneTitle {
-    background: url("//js.arcgis.com/3.18/dijit/themes/tundra/images/titleBar.png") repeat-x scroll left top #FAFAFA !important;
+    background: url("https://js.arcgis.com/3.18/dijit/themes/tundra/images/titleBar.png") repeat-x scroll left top #FAFAFA !important;
     outline: 0 none !important;
     padding: 5px 6px 3px;
     font-weight: bold;

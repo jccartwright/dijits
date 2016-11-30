@@ -79,7 +79,7 @@ define([
                 //add all layers to Map
                 this.map.addLayers(this.mapLayerCollection.mapServices);
 
-                this.geometryService = new GeometryService('//maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
+                this.geometryService = new GeometryService('https://maps.ngdc.noaa.gov/arcgis/rest/services/Utilities/Geometry/GeometryServer');
 
                 this.loadingIconEnabled = true;
 
@@ -223,7 +223,7 @@ define([
 
             getDepth: function (geoPoint) {
                 request({
-                    url: '//gis.ngdc.noaa.gov/arcgis/rest/services/DEM_global_mosaic/ImageServer/identify',
+                    url: 'https://gis.ngdc.noaa.gov/arcgis/rest/services/DEM_global_mosaic/ImageServer/identify',
                     content: {
                         geometry: geoPoint.x+','+geoPoint.y,
                         geometryType:'esriGeometryPoint',
