@@ -46,7 +46,11 @@ define([
 
 
         execute: function(identifyParameters) {
-            var deferred = request.get(this.url + identifyParameters.getQueryInfo()).then(
+            var deferred = request.get(this.url + identifyParameters.getQueryInfo(), {
+                headers: {
+                    "X-Requested-With": null
+                }
+            }).then(
                 lang.hitch(this, function(text) {
 
                     //scrape the HTML response for data since the plain text
