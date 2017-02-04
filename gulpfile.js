@@ -1,8 +1,38 @@
 var gulp = require('gulp');
+var stripDebug = require('gulp-strip-debug');
+var eslint = require('gulp-eslint');
+var clean = require('gulp-clean');
 var exec = require('child_process').exec;
 var watch = require('gulp-watch');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
+
+var srcJsFiles = 'js/**/*.js';
+
+// lint source javascript files. example taken from https://github.com/Esri/angular-esri-map/blob/master/gulpfile.js
+gulp.task('lint', function() {
+  return gulp.src([srcJsFiles])
+    // eslint() attaches the lint output to the eslint property
+    // of the file object so it can be used by other modules.
+    .pipe(eslint())
+    // eslint.format() outputs the lint results to the console.
+    // Alternatively use eslint.formatEach() (see Docs).
+    .pipe(eslint.format());
+    // To have the process exit with an error code (1) on
+    // lint error, return the stream and pipe to failOnError last.
+//    .pipe(eslint.failOnError());
+});
+
+gulp.task('clean', function(){
+    return gulp.src(['dist'])
+        .pipe(clean());
+});
+
+gulp.task('build', function(){
+    return gulp.src([srcJsFiles])
+    .pipe(stripDebug())
+    .pipe(gulp.dest('dist'))
+});
 
 gulp.task('intern', function (cb) {
     exec('./node_modules/.bin/intern-runner config=tests/intern', function (err, stdout, stderr) {
@@ -69,3 +99,5 @@ gulp.task('test', function (done) {
     }
   });
 });
+
+gulp.task('default', ['serve']);
