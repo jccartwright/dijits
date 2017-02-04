@@ -19,6 +19,6 @@
     "gulp-intern": "0.0.4",
     "gulp-strip-debug": "^1.1.0",
     "gulp-watch": "^4.3.5",
-    "intern": "^3.1.1"
+    "intern": "^3.4.2"
   }
 }
