@@ -36,6 +36,7 @@ gulp.task('clean', function(){
 
 gulp.task('scripts', function(){
     return gulp.src([srcJsFiles])
+    //TODO may not be necessary once Dojo build in place since it can selectively strip console statements
     .pipe(stripDebug())
     .pipe(gulp.dest('dist'))
 });
@@ -52,6 +53,12 @@ gulp.task('html', function(){
 gulp.task('styles', function(){
     return gulp.src([srcCssFiles])
     .pipe(gulp.dest('dist'))
+});
+
+gulp.task('files', function(){
+    gulp.watch(['index.html', srcHtmlFiles], ['html']);    
+    gulp.watch(srcJsFiles, ['scripts']);    
+    gulp.watch(srcCssFiles, ['styles']);    
 });
 
 gulp.task('build', ['html', 'styles', 'scripts']);
