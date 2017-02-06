@@ -18,6 +18,7 @@
     "gulp-eslint": "^3.0.1",
     "gulp-intern": "0.0.4",
     "gulp-strip-debug": "^1.1.0",
+    "gulp-token-replace": "^1.0.3",
     "gulp-watch": "^4.3.5",
     "intern": "^3.4.2"
   }

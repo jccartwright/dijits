@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var stripDebug = require('gulp-strip-debug');
+var replace = require('gulp-token-replace');
 var eslint = require('gulp-eslint');
 var clean = require('gulp-clean');
 var exec = require('child_process').exec;
@@ -8,6 +9,11 @@ var browserSync = require('browser-sync');
 var reload = browserSync.reload;
 
 var srcJsFiles = 'js/**/*.js';
+var srcHtmlFiles = 'js/**/*.html';
+var srcCssFiles = 'js/**/*.css';
+
+var p = require('./package.json');
+p.buildDate = new Date();
 
 // lint source javascript files. example taken from https://github.com/Esri/angular-esri-map/blob/master/gulpfile.js
 gulp.task('lint', function() {
@@ -28,11 +34,27 @@ gulp.task('clean', function(){
         .pipe(clean());
 });
 
-gulp.task('build', function(){
+gulp.task('scripts', function(){
     return gulp.src([srcJsFiles])
     .pipe(stripDebug())
     .pipe(gulp.dest('dist'))
 });
+
+gulp.task('html', function(){
+    return gulp.src(['index.html', srcHtmlFiles])
+    .pipe(replace({tokens:{
+        'buildDate': p.buildDate,
+        'version': p.version
+    }}))
+    .pipe(gulp.dest('dist'))
+});
+
+gulp.task('styles', function(){
+    return gulp.src([srcCssFiles])
+    .pipe(gulp.dest('dist'))
+});
+
+gulp.task('build', ['html', 'styles', 'scripts']);
 
 gulp.task('intern', function (cb) {
     exec('./node_modules/.bin/intern-runner config=tests/intern', function (err, stdout, stderr) {
