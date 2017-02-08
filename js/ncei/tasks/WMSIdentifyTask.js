@@ -83,7 +83,7 @@ define([
 
 
                 function(error) {
-                    console.error("Error occurred with GetFeatureInfo request: ", error);
+                    //console.error("Error occurred with GetFeatureInfo request: ", error);
                     this.emit('error', {error: error});
                 }
             );

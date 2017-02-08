@@ -1,3 +1,8 @@
+/*
+ * in addition to the specific notations below, many of these ideas taken from "Developing a Gulp Edge" by
+ * Tomasz Stryjewski and Jed Mao
+ */
+
 var gulp = require('gulp');
 var stripDebug = require('gulp-strip-debug');
 var replace = require('gulp-token-replace');
@@ -5,19 +10,24 @@ var eslint = require('gulp-eslint');
 var clean = require('gulp-clean');
 var exec = require('child_process').exec;
 var watch = require('gulp-watch');
+var express = require('express');
 var browserSync = require('browser-sync');
 var reload = browserSync.reload;
+var gutil = require('gulp-util');
 
-var srcJsFiles = 'js/**/*.js';
-var srcHtmlFiles = 'js/**/*.html';
-var srcCssFiles = 'js/**/*.css';
+var srcJsFiles = ['js/**/*.js'];
+var srcHtmlFiles = ['index.html', 'js/**/*.html'];
+var srcCssFiles = ['js/**/*.css'];
+var srcImageFiles = ['js/**/*.png', 'js/**/*.jpg', 'js/**/*.gif'];
 
 var p = require('./package.json');
 p.buildDate = new Date();
 
+var server;
+
 // lint source javascript files. example taken from https://github.com/Esri/angular-esri-map/blob/master/gulpfile.js
 gulp.task('lint', function() {
-  return gulp.src([srcJsFiles])
+  return gulp.src(srcJsFiles)
     // eslint() attaches the lint output to the eslint property
     // of the file object so it can be used by other modules.
     .pipe(eslint())
@@ -31,34 +41,44 @@ gulp.task('lint', function() {
 
 gulp.task('clean', function(){
     return gulp.src(['dist'])
-        .pipe(clean());
+    .pipe(clean());
 });
 
 gulp.task('scripts', function(){
-    return gulp.src([srcJsFiles])
+    return gulp.src(srcJsFiles)
     //TODO may not be necessary once Dojo build in place since it can selectively strip console statements
     .pipe(stripDebug())
     .pipe(gulp.dest('dist'))
+    .pipe(reload());
+});
+
+gulp.task('images', function() {
+    return gulp.src(srcImageFiles)
+    .pipe(gulp.dest('dist'))
+    // .pipe(reload());
 });
 
 gulp.task('html', function(){
-    return gulp.src(['index.html', srcHtmlFiles])
+    return gulp.src(srcHtmlFiles)
     .pipe(replace({tokens:{
         'buildDate': p.buildDate,
         'version': p.version
     }}))
     .pipe(gulp.dest('dist'))
+    .pipe(reload());
 });
 
 gulp.task('styles', function(){
-    return gulp.src([srcCssFiles])
+    return gulp.src(srcCssFiles)
     .pipe(gulp.dest('dist'))
+    .pipe(reload());
 });
 
 gulp.task('files', function(){
-    gulp.watch(['index.html', srcHtmlFiles], ['html']);    
+    gulp.watch(srcHtmlFiles, ['html']);    
     gulp.watch(srcJsFiles, ['scripts']);    
-    gulp.watch(srcCssFiles, ['styles']);    
+    gulp.watch(srcCssFiles, ['styles']);
+    gulp.watch(srcImageFiles, ['images']);    
 });
 
 gulp.task('build', ['html', 'styles', 'scripts']);
@@ -71,17 +91,16 @@ gulp.task('intern', function (cb) {
     });
 });
 
-gulp.task('watch', function () {
-    watch('**/*.js', function() {
-        exec('./node_modules/.bin/intern-runner config=tests/intern', function (err, stdout, stderr) {
-            console.log(stdout);
-            console.log(stderr);
-        });
-    });
-}); 
+// gulp.task('watch', function () {
+//     watch('**/*.js', function() {
+//         exec('./node_modules/.bin/intern-runner config=tests/intern', function (err, stdout, stderr) {
+//             console.log(stdout);
+//             console.log(stderr);
+//         });
+//     });
+// }); 
 
 gulp.task('serve', function() {
-    //TODO why can't this call the scripts task?
     gulp.watch(['js/**/*.js'], function() {
         return gulp.src('js/**/*.js')
             .pipe(jshint())
@@ -129,4 +148,23 @@ gulp.task('test', function (done) {
   });
 });
 
-gulp.task('default', ['serve']);
+gulp.task('server', function() {
+    server = express();
+    server.use(express.static('dist'));
+    server.listen(9000);
+    browserSync({ proxy: 'localhost:9000'});
+});
+
+function reload() {
+  if (server) {
+    return browserSync.reload({ stream: true });
+  }
+
+  return gutil.noop();
+}
+
+//gulp.task('default', ['serve']);
+gulp.task('default', ['build', 'files', 'server']);
+
+
+

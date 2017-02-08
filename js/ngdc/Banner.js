@@ -4,8 +4,7 @@ define([
     'dijit/_TemplatedMixin', 
     'dojo/string', 
     'dojo/dom-attr',
-    'dojo/text!./templates/Banner.html'
-    ],
+    'dojo/text!./templates/Banner.html'],
     function(
         declare, 
         _WidgetBase, 

@@ -130,7 +130,7 @@ define([
                 this.hide();
 
                 //Set the FloatingPane's Moveable to be constrained to the parent
-                this.moveable = new dojo.dnd.move.parentConstrainedMoveable(
+                this.moveable = new move.parentConstrainedMoveable(
                     this.domNode,
                     {
                         handle: this.focusNode,
