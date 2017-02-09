@@ -12,8 +12,9 @@
     "url": "https://stash.ngdc.noaa.gov:8443/projects/GIS/repos/dijits"
   },
   "devDependencies": {
-    "browser-sync": "^2.12.5",
+    "browser-sync": "^2.18.7",
     "express": "^4.14.1",
+    "graceful-fs": "^4.1.11",
     "gulp": "^3.9.1",
     "gulp-clean": "^0.3.2",
     "gulp-eslint": "^3.0.1",
@@ -21,7 +22,7 @@
     "gulp-strip-debug": "^1.1.0",
     "gulp-token-replace": "^1.0.3",
     "gulp-util": "^3.0.8",
-    "gulp-watch": "^4.3.5",
+    "gulp-watch": "^4.3.11",
     "intern": "^3.4.2"
   }
 }
