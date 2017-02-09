@@ -12,7 +12,6 @@ var exec = require('child_process').exec;
 var watch = require('gulp-watch');
 var express = require('express');
 var browserSync = require('browser-sync');
-var reload = browserSync.reload;
 var gutil = require('gulp-util');
 
 var srcJsFiles = ['js/**/*.js'];
@@ -53,17 +52,16 @@ gulp.task('scripts', function(){
 });
 
 gulp.task('images', function() {
+    console.log('inside images...');
     return gulp.src(srcImageFiles)
     .pipe(gulp.dest('dist'))
-    // .pipe(reload());
+    .pipe(reload());
 });
 
 gulp.task('html', function(){
+    console.log('inside html...');
     return gulp.src(srcHtmlFiles)
-    .pipe(replace({tokens:{
-        'buildDate': p.buildDate,
-        'version': p.version
-    }}))
+    .pipe(replace({tokens:{ 'buildDate': p.buildDate, 'version': p.version}}))
     .pipe(gulp.dest('dist'))
     .pipe(reload());
 });
@@ -81,7 +79,7 @@ gulp.task('files', function(){
     gulp.watch(srcImageFiles, ['images']);    
 });
 
-gulp.task('build', ['html', 'styles', 'scripts']);
+gulp.task('build', ['html', 'styles', 'scripts', 'images']);
 
 gulp.task('intern', function (cb) {
     exec('./node_modules/.bin/intern-runner config=tests/intern', function (err, stdout, stderr) {
@@ -100,6 +98,8 @@ gulp.task('intern', function (cb) {
 //     });
 // }); 
 
+
+//old function which serves from current directory rather than ./dist
 gulp.task('serve', function() {
     gulp.watch(['js/**/*.js'], function() {
         return gulp.src('js/**/*.js')
@@ -114,7 +114,7 @@ gulp.task('serve', function() {
         }
     });
 
-    gulp.watch(['**/*.html', 'css/**/*.css', 'js/**/*.js'], {cwd: '.'}, reload);
+    gulp.watch(['**/*.html', 'css/**/*.css', 'js/**/*.js'], {cwd: '.'}, browserSync.reload);
 });
 
 
@@ -163,7 +163,9 @@ function reload() {
   return gutil.noop();
 }
 
+//old default task
 //gulp.task('default', ['serve']);
+
 gulp.task('default', ['build', 'files', 'server']);
 
 
