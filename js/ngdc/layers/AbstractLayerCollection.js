@@ -114,8 +114,8 @@ define([
                 logger.debug('setting layer timeouts for '+this.name+'...');
                 //setup timeouts for each layer to load
                 this.layerTimeouts = {};
-                dojo.forEach(this.mapServices, function(svc) {
-                    this.layerTimeouts[svc.id] = setTimeout(dojo.partial(this.layerTimeoutHandler, svc), 5000);
+                array.forEach(this.mapServices, function(svc) {
+                    this.layerTimeouts[svc.id] = setTimeout(lang.partial(this.layerTimeoutHandler, svc), 5000);
                     //alternate way to bind argument to closure
                     //globals.layerTimeouts[svc.id] = setTimeout(function(){layerTimeoutHandler(svc.id);}, 5000);
                 }, this);

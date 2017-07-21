@@ -10,8 +10,7 @@ define([
     'dojo/dom-style',
     'dijit/Destroyable', 
     'esri/dijit/Scalebar',
-    'dojo/text!./templates/CoordinatesToolbar.html'
-    ],
+    'dojo/text!./templates/CoordinatesToolbar.html'],
     function(
         declare, 
         _WidgetBase, 

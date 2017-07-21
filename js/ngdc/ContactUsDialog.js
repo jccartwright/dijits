@@ -1,24 +1,23 @@
 define([
-        'dojo/_base/declare',
-        'dijit/Dialog',
-        'dijit/_Widget',
-        'dijit/_TemplatedMixin',
-        'dijit/_WidgetsInTemplateMixin',
-        'dijit/form/Form',
-        'dijit/form/Button',
-        'dijit/form/Select',
-        'dijit/form/SimpleTextarea',
-        'dijit/form/TextBox',
-        'dijit/form/ValidationTextBox',
-        'dojox/validate/web',
-        'dojo/request/xhr',
-        'dojo/_base/lang',
-        'dojo/_base/array',
-        'dojo/dom-attr',
-        'dojo/on',
-        'dojo/topic',
-        'dojo/text!./templates/ContactUsDialog.html'
-    ],
+    'dojo/_base/declare',
+    'dijit/Dialog',
+    'dijit/_Widget',
+    'dijit/_TemplatedMixin',
+    'dijit/_WidgetsInTemplateMixin',
+    'dijit/form/Form',
+    'dijit/form/Button',
+    'dijit/form/Select',
+    'dijit/form/SimpleTextarea',
+    'dijit/form/TextBox',
+    'dijit/form/ValidationTextBox',
+    'dojox/validate/web',
+    'dojo/request/xhr',
+    'dojo/_base/lang',
+    'dojo/_base/array',
+    'dojo/dom-attr',
+    'dojo/on',
+    'dojo/topic',
+    'dojo/text!./templates/ContactUsDialog.html'],
     function(
         declare,
         Dialog,
@@ -38,8 +37,7 @@ define([
         domAttr,
         on,
         topic,
-        template
-    ){
+        template) {
         return declare([Dialog, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
             templateString: template,
@@ -88,16 +86,16 @@ define([
                         headers: {'Content-Type':'application/json'},
                         timeout: 30000
                     }).then(lang.hitch(this, function(){
-                    this.confirmDialog.show();
+                        this.confirmDialog.show();
 
-                    //automatically close dialog after 3 seconds
-                    setTimeout(lang.hitch(this, function() {
-                        this.confirmDialog.hide();
-                    }), 3000);
+                        //automatically close dialog after 3 seconds
+                        setTimeout(lang.hitch(this, function() {
+                            this.confirmDialog.hide();
+                        }), 3000);
 
-                }), function(error) {
-                    alert('Error: ' + error);
-                });
+                    }), function(error) {
+                        alert('Error: ' + error);
+                    });
 
                 this.clearForm();
             },

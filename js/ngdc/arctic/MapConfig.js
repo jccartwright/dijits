@@ -1,7 +1,6 @@
 define([
     'dojo/_base/declare',
-    'ngdc/MapConfig'
-    ],
+    'ngdc/MapConfig'],
     function(
         declare, 
         MapConfig

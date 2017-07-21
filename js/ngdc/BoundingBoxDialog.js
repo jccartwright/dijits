@@ -13,8 +13,7 @@ define([
     'dojo/topic', 
     'esri/geometry/Extent', 
     'esri/SpatialReference', 
-    'dojo/text!./templates/BoundingBoxDialog.html'
-    ],
+    'dojo/text!./templates/BoundingBoxDialog.html'],
     function(
         declare, 
         Dialog, 
@@ -31,7 +30,7 @@ define([
         Extent,
         SpatialReference, 
         template 
-        ){
+    ){
         return declare([Dialog, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
             templateString: template,
@@ -86,5 +85,5 @@ define([
             onCancel: function() {
                 topic.publish('/ngdc/BoundingBoxDialog/cancel');
             }
+        });
     });
-});

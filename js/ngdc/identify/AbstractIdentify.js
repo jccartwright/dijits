@@ -16,8 +16,7 @@ define([
     'esri/graphic',
     'ngdc/identify/IdentifyResultCollection',
     'ncei/tasks/WMSIdentifyParameters',
-    'ncei/tasks/WMSIdentifyTask'
-    ],
+    'ncei/tasks/WMSIdentifyTask'],
     function(
         declare, 
         array, 

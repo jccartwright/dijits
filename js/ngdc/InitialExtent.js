@@ -1,11 +1,10 @@
 define([
     'dojo/_base/declare',
-    'esri/geometry/Extent'
-    ],
+    'esri/geometry/Extent'],
     function(
         declare, 
         Extent
-        ){
+    ){
         return declare([Extent], {
             constructor: function() {
                 //console.log('inside constructor...');

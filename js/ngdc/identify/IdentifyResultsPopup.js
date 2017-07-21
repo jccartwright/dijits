@@ -1,13 +1,5 @@
-define([
-    'dojo/_base/declare', 
-    'dojo/_base/array', 
-    'dojo/topic'
-    ],
-    function(
-        declare, 
-        array, 
-        topic
-        ){
+define(['dojo/_base/declare'],
+    function(declare){
 
         return declare([], {
 
@@ -16,12 +8,7 @@ define([
                 logger.debug('inside constructor for ngdc/identify/IdentifyResultsPopup');
 
                 //TODO hide when Identify operation initiated
-
-                topic.subscribe('/identify/results', function(results){
-                    //console.log(identify.searchGeometry);
-                    console.log('identify results: ', results.results);
-                });
-            } //end constructor
+            }
         });
     }
 );
