@@ -47,6 +47,8 @@ define([
                 this.visible = params.visible;
                 this.opacity = params.opacity;
                 this._map = map;
+                this.ignoreLayerDefinitions = params.ignoreLayerDefinitions;
+                this.ignoreDefaultVisibleLayers = params.ignoreDefaultVisibleLayers;
 
                 //TODO ??
                 //based on values from layerInfos[], populated in layersLoaded()
@@ -255,14 +257,14 @@ define([
                 }
 
                 // 2) definition query applied
-                if (this.layerDefinitions && this.layerDefinitions.length > 0) {
+                if (!this.ignoreLayerDefinitions && this.layerDefinitions && this.layerDefinitions.length > 0) {
                     //console.log('definition query set - switching to dynamic...');
                     this._activateDynamicService();
                     return;
                 }
 
                 // 3) sublayer visibility does not match default
-                if (!this.isDefaultVisibleLayers()) {
+                if (!this.ignoreDefaultVisibleLayers && !this.isDefaultVisibleLayers()) {
                     //console.log('visibleLayers not equal to default - switching to dynamic...');
                     this._activateDynamicService();
                     return;
