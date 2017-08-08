@@ -643,18 +643,18 @@ define([
                 if (graphic) {
                     // set the symbol for the graphic
                     switch (graphic.geometry.type) {
-                        case 'point':
-                            graphic.setSymbol(this.markerSymbol);
-                            break;
-                        case 'multipoint':
-                            graphic.setSymbol(this.markerSymbol);
-                            break;
-                        case 'polyline':
-                            graphic.setSymbol(this.lineSymbol);
-                            break;
-                        case 'polygon':
-                            graphic.setSymbol(this.fillSymbol);
-                            break;
+                    case 'point':
+                        graphic.setSymbol(this.markerSymbol);
+                        break;
+                    case 'multipoint':
+                        graphic.setSymbol(this.markerSymbol);
+                        break;
+                    case 'polyline':
+                        graphic.setSymbol(this.lineSymbol);
+                        break;
+                    case 'polygon':
+                        graphic.setSymbol(this.fillSymbol);
+                        break;
                     }
 
                     // add the highlight graphic to the map
