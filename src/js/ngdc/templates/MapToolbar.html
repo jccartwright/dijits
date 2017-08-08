@@ -1,0 +1,25 @@
+<div class="${baseClass}">
+    <div data-dojo-attach-point="mapToolbar" data-dojo-type="dijit/Toolbar" data-dojo-props="layoutAlign:'left'">
+        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">
+            <span>
+            <table class="identifyLabel">
+                <tr>
+                    <td>Identify&nbsp;</td>
+                    <td><div id="identifyIcon" class="identifyByPointIcon"></div></td>
+                </tr>
+            </table>
+            </span>
+            <div data-dojo-attach-point="identifyMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+        <span data-dojo-type="dijit/ToolbarSeparator"></span>
+        <div data-dojo-attach-point="basemapDropDown" data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">
+            <span>Basemap</span>
+            <div data-dojo-attach-point="basemapMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+        <span data-dojo-type="dijit/ToolbarSeparator"></span>
+        <div data-dojo-type="dijit/form/DropDownButton" data-dojo-props="showLabel:true">
+            <span>Options</span>
+            <div data-dojo-attach-point="overlayMenu" data-dojo-type="dijit/DropDownMenu"></div>
+        </div>
+    </div>
+</div>

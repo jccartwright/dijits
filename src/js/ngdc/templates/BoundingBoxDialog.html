@@ -1,0 +1,52 @@
+<div class="dijitDialog" role="dialog" aria-labelledby="${id}_title">
+    <div data-dojo-attach-point="titleBar" class="dijitDialogTitleBar">
+        <span data-dojo-attach-point="titleNode" class="dijitDialogTitle" id="${id}_title"
+              role="header" level="1"></span>
+        <span style="display: none;" data-dojo-attach-point="closeButtonNode" class="dijitDialogCloseIcon"
+              data-dojo-attach-event="ondijitclick: onCancel" title="${buttonCancel}" role="button" tabIndex="-1">
+            <span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>
+        </span>
+    </div>
+    <div data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">
+        <div>
+            <table>
+            <tr>
+                <td class="center" colspan="2">             
+                    <label>North:</label>
+                    <input name="maxy" data-dojo-attach-point="maxyInput" class="coordInput" type="text" data-dojo-type="dijit/form/NumberTextBox" 
+                    data-dojo-props="constraints:{min:-85,max:85}, invalidMessage:'latitude must be between -85 and 85'" required="true" value=""/>
+                </td>
+            </tr>           
+            <tr>
+                <td class="left-align">
+                    <label>West:</label>
+                    <input name="minx" data-dojo-attach-point="minxInput" class="coordInput" type="text" data-dojo-type="dijit/form/NumberTextBox" 
+                    data-dojo-props="constraints:{min:-180,max:180}, invalidMessage:'longitude must be between -180 and 180'" required="true" value=""/>
+                </td>
+                <td class="right-align">
+                    <label>East:</label>
+                    <input name="maxx" data-dojo-attach-point="maxxInput" class="coordInput" type="text" data-dojo-type="dijit/form/NumberTextBox" 
+                    data-dojo-props="constraints:{min:-180,max:180}, invalidMessage:'longitude must be between -180 and 180'" required="true"value=""/>         
+                </td>
+            </tr>
+            <tr>
+                <td class="center" colspan="2">             
+                    <label>South:</label>
+                    <input name="miny" data-dojo-attach-point="minyInput" class="coordInput" type="text" data-dojo-type="dijit/form/NumberTextBox" 
+                    data-dojo-props="constraints:{min:-85,max:85}, invalidMessage:'latitude must be between -85 and 85'" required="true" value=""/>
+                </td>
+            </tr>
+            </table>
+        </div>  
+        <div id="units" data-dojo-attach-point="unitsText">Latitude: -85 to 85; Longitude: -180 to 180<br/>(signed decimal degrees)</div>
+
+        <div class="dijitDialogPaneActionBar right-align">
+            <button disabled data-dojo-type="dijit.form.Button" data-dojo-attach-point="submitButton" type="submit">OK</button>
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="cancelButton">Cancel</button>
+            <button data-dojo-type="dijit.form.Button" data-dojo-attach-point="clearButton">Clear</button>
+        </div>
+    </div>
+</div>
+
+
+
