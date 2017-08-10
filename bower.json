@@ -1,11 +1,18 @@
 {
   "name": "dijits",
   "resolutions": {
-    "dojo": "v1.11.2/esri-3.19.0",
-    "dijit": "v1.11.2/esri-3.19.0",
-    "dojox": "v1.11.2/esri-3.19.0"
+    "dojo": "v1.12.1/esri-3.20.0",
+    "dijit": "v1.12.1/esri-3.20.0",
+    "dojox": "v1.12.1/esri-3.20.0",
+    "util": "v1.12.1/esri-3.20.0",
+    "dojo-themes": "1.12.1",
+    "dgrid": "0.3.17/esri-3.20.0",
+    "dgrid1": "v1.1.0/esri-3.20.0",
+    "moment": "2.17.1",
+    "xstyle": "0.3.2",
+    "dstore": "1.1.1"
   },
   "dependencies": {
-    "arcgis-js-api": "arcgis-js-api#3.19.0"
+    "arcgis-js-api": "arcgis-js-api#3.20.0"
   }
 }

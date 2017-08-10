@@ -12,7 +12,7 @@ define([
     'dojo/_base/lang', 
     'dojo/dom',
     'esri/request'
-    ],
+],
     function(
         declare, 
         Map, 

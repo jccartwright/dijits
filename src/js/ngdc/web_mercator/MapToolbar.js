@@ -1,8 +1,7 @@
 define([
     'dojo/_base/declare',
     'ngdc/MapToolbar', 
-    'esri/geometry/webMercatorUtils'
-    ],
+    'esri/geometry/webMercatorUtils'],
     function(
         declare, 
         MapToolbar, 
