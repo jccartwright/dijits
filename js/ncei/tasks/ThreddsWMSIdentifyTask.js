@@ -34,10 +34,6 @@ define([
                 lang.hitch(this, function(text) {
 
                     var responseFragment = domConstruct.toDom(text);
-                    var headerFields = [];
-                    query("th", responseFragment).forEach(function(node){
-                        headerFields.push(node.innerHTML);
-                    });
 
                     //<WMSIdentifyResult[]> list of returned features.
                     var responseData = [];
@@ -46,6 +42,7 @@ define([
 
                     var attr = {};
                     var valueQuery;
+                    //Search the XML response for the word 'Value' and assign the contents to the attribute called 'Value'
                     if (valueQuery = query('value', responseFragment)) {
                         attr['Value'] = valueQuery[0].innerHTML;
                     }
