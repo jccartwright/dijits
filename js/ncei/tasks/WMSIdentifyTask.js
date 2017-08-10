@@ -66,15 +66,18 @@ define([
 
                     var identifyResult;
 
-                    query("tbody > tr", responseFragment).forEach(function(node){
+                    query("tr", responseFragment).forEach(lang.hitch(this, function(node){
                         var attr = {};
                         query("td", node).forEach(function (node, index) {
                             attr[headerFields[index]] = node.innerHTML;
                         });
-                        identifyResult = new WMSIdentifyResult();
-                        identifyResult.feature = new Graphic(null, null, attr, null);
-                        responseData.push(identifyResult);
-                    });
+
+                        if (!this.isObjectEmpty(attr)) {
+                            identifyResult = new WMSIdentifyResult();
+                            identifyResult.feature = new Graphic(null, null, attr, null);
+                            responseData.push(identifyResult);
+                        }
+                    }));
 
                     this.emit('complete', {results: responseData});
 
@@ -89,6 +92,15 @@ define([
             );
 
             return deferred;
+        },
+
+        isObjectEmpty: function(obj) {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+            return true;
         }
     });
 });
