@@ -66,7 +66,7 @@ define([
                 layers: this.layers,
                 width: this._map.width,
                 height: this._map.height,
-                crs: this.crs,
+                crs: 'EPSG:' + this.crs,
                 minx: this._map.extent.xmin,
                 miny: this._map.extent.ymin,
                 maxx: this._map.extent.xmax,
