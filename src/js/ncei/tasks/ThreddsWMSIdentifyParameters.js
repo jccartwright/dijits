@@ -18,12 +18,16 @@ define([
 
     //used to construct QueryInfo part of URL. could be done w/in WMSIdentifyTask as well
     var QUERY_INFO_TEMPLATE = "REQUEST=GetFeatureInfo&SERVICE=WMS&WIDTH={width}&HEIGHT={height}&CRS={crs}" + 
-        "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}&FEATURE_COUNT={max_features}" +
+        "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}" +
         "&BBOX={minx},{miny},{maxx},{maxy}&i={col}&j={row}";
 
 
     return declare([WMSIdentifyParameters], {
-        
+
+        constructor: function() {
+            this.additionalParams = {};
+        },
+
         /**
          * return a WMS GetFeatureInfo URL constructed from GetMap request and map click event
          * @param evt
@@ -58,7 +62,29 @@ define([
                 row: screenGeom.y
             };
 
-            return(lang.replace(QUERY_INFO_TEMPLATE, params));
+            //Augment the identify params with any additional params (i.e. elevation)
+            if (!this.isObjectEmpty(this.additionalParams)) {
+                lang.mixin(params, this.additionalParams);
+            }
+
+            //If there are additional params, add them to the URL template. Assume that the URL param has the same name as the paramName.
+            var queryInfoTemplate = QUERY_INFO_TEMPLATE;
+            for (var paramName in this.additionalParams) {
+                if (this.additionalParams.hasOwnProperty(paramName)) {
+                    queryInfoTemplate += '&' + paramName + '={' + paramName + '}';
+                }
+            }
+
+            return(lang.replace(queryInfoTemplate, params));
+        },
+
+        isObjectEmpty: function(obj) {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+            return true;
         }
     });
 });
