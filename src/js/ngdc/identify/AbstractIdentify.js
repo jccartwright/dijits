@@ -75,6 +75,13 @@ define([
 
                 this.taskInfos = this.createTaskInfos(this.layerIds, layerCollection);
 
+                topic.subscribe('/identify/updateLayerUrl', lang.hitch(this, function(layerId, url) {
+                    this.updateLayerUrl(layerId, url);
+                }));
+                topic.subscribe('/identify/updateLayerParams', lang.hitch(this, function(layerId, params) {
+                    this.updateLayerParams(layerId, params);
+                }));
+
                 // the symbol used to represent the location where the user clicked on the map
                 this.clickSymbol = params.clickSymbol ||
                     new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_X, 12, new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([0, 0, 255]), 3));
@@ -190,7 +197,9 @@ define([
                     //publish message w/ results
                     //TODO place into a Store instead?
                     topic.publish('/identify/results', resultCollection);
-                }));
+                }), function(error) {
+                    console.error(error);
+                });
             },
 
             sortResults: function() {
@@ -264,6 +273,26 @@ define([
                 return (taskInfos);
             },
 
+            //Update the URL for the specified task. Used for THREDDS WMS endpoints with changing URLs.
+            updateLayerUrl: function(layerId, url) {
+                array.forEach(this.taskInfos, lang.hitch(this, function(taskInfo) {
+                    if (taskInfo.layer.id === layerId) {
+                        taskInfo.task.url = url;
+                        if (taskInfo.task.standardizeUrl) {
+                            taskInfo.task.standardizeUrl();
+                        }
+                    }
+                }));
+            },
+
+            //Augment the layer's identify params with additional params. Used for WMS endpoints with extra params such as elevation.
+            updateLayerParams: function(layerId, additionalParams) {
+                array.forEach(this.taskInfos, lang.hitch(this, function(taskInfo) {
+                    if (taskInfo.layer.id === layerId) {
+                        lang.mixin(taskInfo.params.additionalParams, additionalParams);
+                    }
+                }));    
+            },
 
             createWMSIdentifyParams: function(layer) {
                 var identifyParameters;
