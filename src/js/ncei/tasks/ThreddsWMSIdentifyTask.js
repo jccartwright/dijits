@@ -41,9 +41,10 @@ define([
                     var identifyResult;
 
                     var attr = {};
-                    var valueQuery;
+                    
                     //Search the XML response for the word 'Value' and assign the contents to the attribute called 'Value'
-                    if (valueQuery = query('value', responseFragment)) {
+                    var valueQuery = query('value', responseFragment);
+                    if (valueQuery) {
                         attr['Value'] = valueQuery[0].innerHTML;
                     }
 
