@@ -30,8 +30,7 @@ define([
     'dojo/topic',
     'dojo/_base/connect', 
     'dojo/on', 
-    'dojo/text!./templates/MapToolbar.html'
-    ],
+    'dojo/text!./templates/MapToolbar.html'],
     function(
         declare, 
         _WidgetBase, 

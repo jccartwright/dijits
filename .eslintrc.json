@@ -14,8 +14,9 @@
             "unix"
         ],
         "quotes": [
-            "warn",
-            "single"
+            "off",
+            "single",
+            { "avoidEscape": true }            
         ],
         "semi": [
             "error",

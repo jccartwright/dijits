@@ -244,8 +244,9 @@ define([
             calculateWebMercatorExtent: function() {
                 var geographicExtent = this.clampExtentTo85(
                     new Extent(this.initialExtent.xmin, this.initialExtent.ymin, this.initialExtent.xmax, this.initialExtent.ymax, {
-                    spatialReference:{wkid:4326}
-                }));
+                        spatialReference:{wkid:4326}
+                    }
+                ));
 
                 this.webMercatorExtent = webMercatorUtils.geographicToWebMercator(geographicExtent);
 
