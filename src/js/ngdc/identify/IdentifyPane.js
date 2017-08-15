@@ -484,7 +484,7 @@ define([
                     }
 
                     //Only query for geometry if it's an ArcGIS service, not a WMS
-                    if (item.layerType !== 'WMS') {
+                    if (item.layerType !== 'WMS' && item.layerType !== 'threddsWMS') {
                         clearTimeout(this.mouseOverTimer); //clear any existing timeout
                         this.mouseOverTimer = setTimeout(lang.hitch(this, function(){
                             //only fire a query if hovering for >100ms
