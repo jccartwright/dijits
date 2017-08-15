@@ -146,7 +146,7 @@ define([
                 this.deferreds = {};
 
                 array.forEach(this.taskInfos, function(taskInfo){
-                    if (taskInfo.layer.layerType === 'WMS' && geometry.type !== 'point') {
+                    if ((taskInfo.layer.layerType === 'WMS' || taskInfo.layer.layerType === 'threddsWMS') && geometry.type !== 'point') {
                         //WMS only handles points
                         return;
                     }
