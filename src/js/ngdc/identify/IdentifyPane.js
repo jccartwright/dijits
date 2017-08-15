@@ -433,8 +433,13 @@ define([
 
                 this.currentItem = item;
 
+                if (!this.identify.formatters[item.layerKey]) {
+                    //Immediately return if there is no formatter associated with this layer
+                    return;
+                }
+
                 //Highlight the current geometry (specifically for touch-screen devices where the mouseOver event won't fire)
-                if (item.layerType !== 'WMS') {
+                if (item.layerType !== 'WMS' && item.layerType !== 'threddsWMS') {
                     domStyle.set(this.zoomToButton.domNode, 'display', ''); //show the "Zoom to" button
                     this.queryForHighlightGeometry(item);
                 } else {
@@ -443,8 +448,7 @@ define([
 
                 this.setTitle('Attributes: ' + item.displayLabel);
 
-                var layerKey = item.layerKey;
-                this.setInfoPaneContent(this.identify.formatters[layerKey](item));
+                this.setInfoPaneContent(this.identify.formatters[item.layerKey](item));
 
                 this.showInfoPage();
                 var size = {w: this.domNode.clientWidth, h: this.domNode.clientHeight}; //hack: prevent it from resetting to the initial size/position when calling resize()

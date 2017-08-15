@@ -2,44 +2,31 @@ define([
     "dojo/_base/declare",
     "dojo/_base/lang",
     "dojo/io-query",
-    "esri/geometry/screenUtils"
+    "esri/geometry/screenUtils",
+    "ncei/tasks/WMSIdentifyParameters"
 ], function(
     declare,
     lang,
     ioQuery,
-    screenUtils) {
+    screenUtils,
+    WMSIdentifyParameters) {
 
     //"static" variables - shared across instances
-    var INFO_FORMAT = "text/html";
+    var INFO_FORMAT = "text/xml";
     var WMS_VERSION = "1.3.0";
     var MAX_FEATURES = 99;
 
     //used to construct QueryInfo part of URL. could be done w/in WMSIdentifyTask as well
     var QUERY_INFO_TEMPLATE = "REQUEST=GetFeatureInfo&SERVICE=WMS&WIDTH={width}&HEIGHT={height}&CRS={crs}" + 
-        "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}&FEATURE_COUNT={max_features}" +
+        "&LAYERS={layers}&QUERY_LAYERS={layers}&VERSION={version}&INFO_FORMAT={format}" +
         "&BBOX={minx},{miny},{maxx},{maxy}&i={col}&j={row}";
 
 
-    return declare([], {
-        //comma separated list of layer names
-        layers: null,
+    return declare([WMSIdentifyParameters], {
 
-        //SRID used with BBOX coordinates
-        crs: null,
-
-        //can be used to override previous properties
-        getMapRequestUrl: null,
-
-        //MapPoint
-        geometry: null,
-
-        //keep a reference to the map to facilitate internal calculation of extent, screen position of mouse click
-        _map: null,
-
-        constructor: function(params) {
-            this._map = params.map;
+        constructor: function() {
+            this.additionalParams = {};
         },
-
 
         /**
          * return a WMS GetFeatureInfo URL constructed from GetMap request and map click event
@@ -75,26 +62,29 @@ define([
                 row: screenGeom.y
             };
 
-            return(lang.replace(QUERY_INFO_TEMPLATE, params));
+            //Augment the identify params with any additional params (i.e. elevation)
+            if (!this.isObjectEmpty(this.additionalParams)) {
+                lang.mixin(params, this.additionalParams);
+            }
+
+            //If there are additional params, add them to the URL template. Assume that the URL param has the same name as the paramName.
+            var queryInfoTemplate = QUERY_INFO_TEMPLATE;
+            for (var paramName in this.additionalParams) {
+                if (this.additionalParams.hasOwnProperty(paramName)) {
+                    queryInfoTemplate += '&' + paramName + '={' + paramName + '}';
+                }
+            }
+
+            return(lang.replace(queryInfoTemplate, params));
         },
 
-
-        /**
-         * parse the WMS GetMap URL to derive the WMS GetFeatureInfo URL
-         *
-         * example WMS GetMap URL
-         * http://geoservice.maris2.nl/wms/seadatanet/emodnet_hydrography?REQUEST=GetMap&SERVICE=WMS
-         * &BGCOLOR=0xFFFFFF&TRANSPARENT=TRUE&reaspect=false&WIDTH=512&HEIGHT=512&CRS=EPSG:900913
-         * &LAYERS=EMODnet_Bathymetry_multi_beams_polygons&VERSION=1.3.0&FORMAT=image/png
-         * &SLD=http://maps.ngdc.noaa.gov/viewers/emodnet.sld&BBOX=-5009377.085697226,0,0,5009377.085697209
-         */
-        parseGetMapRequestUrl: function() {
-            var wmsUrl = this.getMapRequestUrl;
-
-            var queryString = wmsUrl.substring(wmsUrl.indexOf('?') + 1, wmsUrl.length);
-            var queryObject = ioQuery.queryToObject(queryString);
-
-            return(queryObject);
+        isObjectEmpty: function(obj) {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key)) {
+                    return false;
+                }
+            }
+            return true;
         }
     });
 });

@@ -16,7 +16,9 @@ define([
     'esri/graphic',
     'ngdc/identify/IdentifyResultCollection',
     'ncei/tasks/WMSIdentifyParameters',
-    'ncei/tasks/WMSIdentifyTask'],
+    'ncei/tasks/ThreddsWMSIdentifyParameters',
+    'ncei/tasks/WMSIdentifyTask',
+    'ncei/tasks/ThreddsWMSIdentifyTask'],
     function(
         declare, 
         array, 
@@ -35,7 +37,9 @@ define([
         Graphic,
         IdentifyResultCollection,
         WMSIdentifyParameters,
-        WMSIdentifyTask
+        ThreddsWMSIdentifyParameters,
+        WMSIdentifyTask,
+        ThreddsWMSIdentifyTask
         ) {
 
         return declare([], {
@@ -70,6 +74,13 @@ define([
                 this._map.on('extent-change', lang.hitch(this, 'updateMapExtent'));
 
                 this.taskInfos = this.createTaskInfos(this.layerIds, layerCollection);
+
+                topic.subscribe('/identify/updateLayerUrl', lang.hitch(this, function(layerId, url) {
+                    this.updateLayerUrl(layerId, url);
+                }));
+                topic.subscribe('/identify/updateLayerParams', lang.hitch(this, function(layerId, params) {
+                    this.updateLayerParams(layerId, params);
+                }));
 
                 // the symbol used to represent the location where the user clicked on the map
                 this.clickSymbol = params.clickSymbol ||
@@ -186,7 +197,9 @@ define([
                     //publish message w/ results
                     //TODO place into a Store instead?
                     topic.publish('/identify/results', resultCollection);
-                }));
+                }), function(error) {
+                    console.error(error);
+                });
             },
 
             sortResults: function() {
@@ -232,8 +245,17 @@ define([
                             enabled: layer.visible,
                             params: this.createWMSIdentifyParams(layer)
                         });
+                    } 
+                    else if (layer.layerType === 'threddsWMS') {
+                        taskInfos.push({
+                            layer: layer,
+                            task: new ThreddsWMSIdentifyTask(layer.url),
+                            enabled: layer.visible,
+                            params: this.createWMSIdentifyParams(layer)
+                        });
 
-                    } else {
+                    }
+                    else {
                         //listen for changes to visibility in sublayers
                         aspect.after(layer, 'setVisibleLayers', lang.hitch(this, lang.partial(this.updateVisibleLayers, layer)), true);
 
@@ -251,11 +273,47 @@ define([
                 return (taskInfos);
             },
 
+            //Update the URL for the specified task. Used for THREDDS WMS endpoints with changing URLs.
+            updateLayerUrl: function(layerId, url) {
+                array.forEach(this.taskInfos, lang.hitch(this, function(taskInfo) {
+                    if (taskInfo.layer.id === layerId) {
+                        taskInfo.task.url = url;
+                        if (taskInfo.task.standardizeUrl) {
+                            taskInfo.task.standardizeUrl();
+                        }
+                    }
+                }));
+            },
+
+            //Augment the layer's identify params with additional params. Used for WMS endpoints with extra params such as elevation.
+            updateLayerParams: function(layerId, additionalParams) {
+                array.forEach(this.taskInfos, lang.hitch(this, function(taskInfo) {
+                    if (taskInfo.layer.id === layerId) {
+                        lang.mixin(taskInfo.params.additionalParams, additionalParams);
+                    }
+                }));    
+            },
 
             createWMSIdentifyParams: function(layer) {
-                var identifyParameters = new WMSIdentifyParameters({map: this._map});
-                identifyParameters.crs = 'EPSG:900913';
-                identifyParameters.layers = layer.layerNames.join(',');
+                var identifyParameters;
+                if (layer.layerType === 'threddsWMS') {
+                    identifyParameters = new ThreddsWMSIdentifyParameters({map: this._map});
+                }
+                else {
+                    identifyParameters = new WMSIdentifyParameters({map: this._map});
+                }
+
+                if (layer.epsgCode) { //allow a custom epsgCode specified in the layer's constructor, which may differ from the map (ex. 102100 vs. 900913)
+                    identifyParameters.crs = layer.epsgCode;
+                } else {
+                    identifyParameters.crs = this._map.spatialReference.wkid;
+                }
+                
+                if (layer.layerNames) {
+                    identifyParameters.layers = layer.layerNames.join(',');
+                } else if (layer.visibleLayers) {
+                    identifyParameters.layers = layer.visibleLayers.join(',');
+                }
                 return(identifyParameters);
             },
 
