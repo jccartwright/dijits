@@ -181,6 +181,8 @@ define([
                         serviceUrls[taskInfo.layer.id] = taskInfo.layer.url;
                         if (taskInfo.layer.layerType === 'WMS') {
                             serviceTypes[taskInfo.layer.id] = 'WMS';
+                        } else if (taskInfo.layer.layerType === 'threddsWMS') {
+                            serviceTypes[taskInfo.layer.id] = 'threddsWMS';
                         } else {
                             serviceTypes[taskInfo.layer.id] = 'ArcGIS';
                         }
