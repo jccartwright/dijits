@@ -36,10 +36,10 @@ define([
 
         //standardize URL. default to http protocol and add ? if necessary
         standardizeUrl: function() {
-            if (! this.url.startsWith('http')) {
+            if (!new RegExp('^http').test(this.url)) {
                 this.url = 'http:' + this.url;
             }
-            if (! this.url.endsWith('?')) {
+            if (!new RegExp('\\?$').test(this.url)) {
                 this.url = this.url + '?';
             }
         },
